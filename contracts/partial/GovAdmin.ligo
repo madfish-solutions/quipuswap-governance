@@ -50,20 +50,3 @@ record [
   status: status;
   config: proposal_config
 ]
-
-const min_proposal_period: day = 3n;
-const max_proposal_period: day = 30n;
-function newProposal (const voting_period: day; var s : storage) : storage is
-  block {
-    if voting_period > min_proposal_period then skip
-    else failwith("Minimum voting period 3 days");
-
-    const end_date: timestamp = Tezos.now + days * 86_400;
-    s.proposals[s.id_count] := record [
-      votesFor =  0n;
-      votesAgainst = 0n;
-      end_date = end_date;
-    ];
-
-    s.id_count := s.id_count + 1n
-  } with s

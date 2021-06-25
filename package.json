@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "@taquito/signer": "^9.1.1",
-    "@taquito/taquito": "^9.1.1"
+    "@taquito/taquito": "^9.1.1",
+    "dotenv": "^10.0.0",
+    "yargs": "^17.0.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",
@@ -28,9 +30,11 @@
     "mocha": "^9.0.0"
   },
   "scripts": {
-    "compile": "docker run -v $PWD:$PWD --rm -i ligolang/ligo:0.18.0 compile-contract --michelson-format=json $PWD/contracts/.ligo main > build/.json",
-    "start-sandbox": "docker run --rm --name my-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210316 flobox start",
-    "migration": "node ./scripts/migrate.js",
+    "clean": "rm -rf ./builds/",
+    "migrate": "node scripts/cli.js migrate",
+    "compile": "yarn clean && node scripts/cli.js compile",
+    "start-sandbox": "docker run --rm --name dev-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210602 flobox start",
+    "stop-sandbox": "docker kill dev-sandbox",
     "test": "mocha 'tests/**/*.js' --timeout 150000"
   }
 }

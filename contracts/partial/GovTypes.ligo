@@ -1,5 +1,5 @@
-type id is nat;
-
+type id is nat
+type day is nat
 type vote is
 | For
 | Against
@@ -15,9 +15,9 @@ record [
 ]
 
 type proposal_setting is
-  | RequiredProposalStake
-  | MinimalVotingQuorum
-  | MinimalApprovalQuorum
+  | Required_proposal_stake
+  | Minimal_voting_quorum
+  | Minimal_approval_quorum
 
 type proposal_setup is (proposal_setting * nat)
 
@@ -32,16 +32,23 @@ type status is
 
 type proposal is
 record [
-  ipfs_link: QIP;
-  forum_link: QIP;
-  votesFor: nat;
-  votesAgainst: nat;
+  ipfs_link: bytes;
+  forum_link: bytes;
+  votes_for: nat;
+  votes_against: nat;
   start_date: timestamp;
   end_date: timestamp;
   status: status;
   config: proposal_config
 ]
 
+type ipfs_link is bytes
+type forum_link is bytes
+type voting_period is day
+type new_proposal is (ipfs_link * forum_link * voting_period)
+type deferral is day
+
+type new_deferred_proposal is (ipfs_link * forum_link * voting_period * deferral)
 type storage is
 record [
   owner: address;

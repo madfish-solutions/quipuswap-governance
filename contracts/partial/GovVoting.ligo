@@ -56,7 +56,7 @@ function newDeferredProposal (
     ];
 
     s.id_count := s.id_count + 1n
-}
+} with s
 
 function addVote (const prop_id: id; const new_vote: vote; var s: storage) : storage is
   block {

@@ -33,20 +33,9 @@ block {
   else failwith("This method is for the owner only");
 
   case param of
-      | RequiredProposalStake -> s := s with record[proposal_config.required_proposal_stake = value]
-      | MinimalVotingQuorum -> s := s with record[proposal_config.minimal_voting_quorum = value]
-      | MinimalApprovalQuorum -> s := s with record[proposal_config.minimal_approval_quorum = value]
+      | Required_proposal_stake -> s := s with record[proposal_config.required_proposal_stake = value]
+      | Minimal_voting_quorum -> s := s with record[proposal_config.minimal_voting_quorum = value]
+      | Minimal_approval_quorum -> s := s with record[proposal_config.minimal_approval_quorum = value]
   end;
 } with s
 
-type proposal is
-record [
-  ipfs_link: QIP;
-  forum_link: QIP;
-  votesFor: nat;
-  votesAgainst: nat;
-  start_date: timestamp;
-  end_date: timestamp;
-  status: status;
-  config: proposal_config
-]

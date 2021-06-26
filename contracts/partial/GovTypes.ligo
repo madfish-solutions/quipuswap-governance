@@ -56,7 +56,7 @@ record [
   proposals: big_map(id, proposal);
   votes: big_map(voter, vote);
   proposal_config: proposal_config;
-  pending_ownertranship_tranfer: option (address)
+  pending_ownership_tranfer: option (address)
 
 ]
 

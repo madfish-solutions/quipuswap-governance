@@ -43,3 +43,22 @@ block {
   end;
 } with s
 
+function banProposal (const prop_id: id; var s: storage ) : storage is
+block {
+  if Tezos.sender = s.owner then skip
+  else failwith("This method is for the owner only");
+
+  var proposal : proposal := getProposal(prop_id, s);
+
+  if Big_map.mem(prop_id, s.proposals) then skip
+  else failwith("Invalid proposal id");
+
+  if (proposal.status = Pending or proposal.status = Voting) then skip
+  else failwith("Proposal is already completed or blocked");
+
+  proposal.status := Banned;
+  s.proposals[prop_id] := proposal;
+
+  // TODO burn tokens
+
+} with s

@@ -15,9 +15,9 @@ const signerBob = new InMemorySigner(bob.sk);
 
 Tezos.setSignerProvider(signerAlice);
 
-const { getDeploydAddress } = require("../../scripts/helpers");
+// const { getDeploydAddress } = require("../../scripts/helpers");
 
-const deployedContract = getDeploydAddress("Governance");
+// const deployedContract = getDeploydAddress("Governance");
 
 
-module.exports = { Tezos, deployedContract, signerAlice, signerBob }
+module.exports = { Tezos, signerAlice, signerBob }

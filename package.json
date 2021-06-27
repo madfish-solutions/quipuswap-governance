@@ -35,6 +35,7 @@
     "compile": "yarn clean && node scripts/cli.js compile",
     "start-sandbox": "docker run --rm --name dev-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210602 flobox start",
     "stop-sandbox": "docker kill dev-sandbox",
-    "test": "mocha 'tests/**/*.js' --timeout 150000"
-  }
+    "test": "mocha 'tests/*.js' --timeout 150000"
+  },
+  "target": "ES6"
 }

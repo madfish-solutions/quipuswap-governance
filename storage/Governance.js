@@ -13,6 +13,6 @@ module.exports = {
   proposals: MichelsonMap.fromLiteral({}),
   votes: MichelsonMap.fromLiteral({}),
   proposal_config: proposalConfig,
-  pending_ownertranship_tranfer: null
+  pending_ownership_tranfer: null
 };
 

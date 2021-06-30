@@ -35,3 +35,10 @@ yarn stop-sandbox
 yarn compile
 
 ```
+
+# Deploy contract
+
+```
+yarn migrate
+
+```

@@ -1,5 +1,6 @@
 const { rejects, strictEqual, notStrictEqual } = require("assert")
 const { Tezos, signerAlice, signerBob } = require("./utils/cli");
+const { migrate } = require("../scripts/helpers");
 const { alice } = require("../scripts/sandbox/accounts");
 const { bob } = require("../scripts/sandbox/accounts");
 
@@ -41,15 +42,12 @@ async function awaitBanProposal(contract) {
      } while ( proposal.status["banned"] === undefined )
 };
 
-const { migrate } = require("../scripts/helpers");
-
-
 
 describe('Admin test', async function () {
     let contract;
 
     var s = [
-        "withPendingProposal", "defaultStorage", "defaultStorage",
+        "withProposals", "defaultStorage", "defaultStorage",
         "defaultStorage", "defaultStorage", "defaultStorage",
         "defaultStorage", "defaultStorage", "defaultStorage",
         "withPendingOwnershipBob", "defaultStorage", "defaultStorage",
@@ -58,7 +56,7 @@ describe('Admin test', async function () {
     beforeEach(async () => {
         let q = s.pop();
         try {
-            const { storages } = require("./storage/adminStorage");
+            const { storages } = require("./storage/storage");
             let deployedContract = await migrate(Tezos, "Governance", storages[q]);
             contract = await confirmContract(Tezos, deployedContract);
 

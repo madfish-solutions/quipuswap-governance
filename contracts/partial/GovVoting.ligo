@@ -8,9 +8,9 @@ function newProposal (
     const voting_period: day;
     var s : storage) : storage is
   block {
-    if voting_period > min_proposal_period then skip
+    if voting_period >= min_proposal_period then skip
     else failwith("Minimum voting period 3 days");
-    if voting_period < max_proposal_period then skip
+    if voting_period <= max_proposal_period then skip
     else failwith("Maxium voting period 30 days");
 
     const end_date: timestamp = Tezos.now + voting_period * 86_400;
@@ -35,7 +35,7 @@ function newDeferredProposal (
     const deferral: day;
     var s : storage) : storage is
   block {
-    if voting_period > min_proposal_period then skip
+    if voting_period >= min_proposal_period then skip
     else failwith("Minimum voting period 3 days");
     if voting_period <= max_proposal_period then skip
     else failwith("Maxium voting period 30 days");
@@ -76,6 +76,8 @@ function addVote (const prop_id: id; const new_vote: vote; var s: storage) : sto
 
     if not(Map.mem((prop_id, Tezos.sender), s.votes)) then skip
     else failwith("You have already voted for this proposal");
+
+    // TODO: check stake
 
     s.votes := Map.add((prop_id, (Tezos.sender: address)), new_vote, s.votes);
     case new_vote of

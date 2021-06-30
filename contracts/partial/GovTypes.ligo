@@ -19,7 +19,7 @@ type proposal_setting is
   | Minimal_voting_quorum
   | Minimal_approval_quorum
 
-type proposal_setup is (proposal_setting * nat)
+type proposal_setup is proposal_setting * nat
 
 type status is
   | Pending

@@ -4,24 +4,26 @@
 #include "../partial/GovVoting.ligo"
 
 type parameter is
-  | TransferOwnership of (option(address))
-  | TakeOwnership of unit
-  | CancelTransferOwnership of unit
-  | SetProposalSetup of proposal_setup
-  | BanProposal of id
-  | NewProposal of new_proposal
-  | NewDeferredProposal of new_deferred_proposal
-  | Vote of new_vote
+  | Transfer_ownership        of (option(address))
+  | Take_ownership            of unit
+  | Cancel_transfer_ownership of unit
+  | Set_proposal_setup        of proposal_setup
+  | Ban_proposal              of id
+  | New_proposal              of new_proposal
+  | New_deferred_proposal     of new_deferred_proposal
+  | Vote                      of new_vote
 
-function main (const action : parameter; const s : storage) : return is
+function main(
+  const action          : parameter;
+  const s               : storage)
+                        : return is
   case action of
-    | TransferOwnership(params) -> ((nil : list(operation)), transferOwnership(params, s))
-    | TakeOwnership(_params) -> ((nil : list(operation)), takeOwnership(s))
-    | CancelTransferOwnership(_params) -> ((nil : list(operation)), cancelTransferOwnership(s))
-    | SetProposalSetup(params) -> ((nil : list(operation)), setProposalSetup(params.0, params.1, s))
-    | BanProposal(params) -> ((nil : list(operation)), banProposal(params, s))
-    | NewProposal(params) -> ((nil : list(operation)), newProposal(params.0, params.1, params.2, s))
-    | NewDeferredProposal(params) -> ((nil : list(operation)), newDeferredProposal(params.0, params.1, params.2, params.3, s))
-    | Vote(params) -> ((nil : list(operation)), addVote(params.0, params.1, s))
-
+    | Transfer_ownership(params) -> ((nil : list(operation)), transfer_ownership(params, s))
+    | Take_ownership(_) -> ((nil : list(operation)), take_ownership(s))
+    | Cancel_transfer_ownership(_) -> ((nil : list(operation)), cancel_transfer_ownership(s))
+    | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params.0, params.1, s))
+    | Ban_proposal(params) -> ((nil : list(operation)), ban_proposal(params, s))
+    | New_proposal(params) -> ((nil : list(operation)), new_proposal(params.0, params.1, params.2, s))
+    | New_deferred_proposal(params) -> ((nil : list(operation)), new_deferred_proposal(params.0, params.1, params.2, params.3, s))
+    | Vote(params) -> ((nil : list(operation)), add_vote(params.0, params.1, s))
   end

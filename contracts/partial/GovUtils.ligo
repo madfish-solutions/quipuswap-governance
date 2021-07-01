@@ -1,7 +1,7 @@
 function getProposal(
-    const prop_id       : id;
-    const s             : storage)
-                        : proposal is
+    const prop_id       : id_type;
+    const s             : storage_type)
+                        : proposal_type is
   case s.proposals[prop_id] of
     None -> record [
       ipfs_link         = 0x7070;

@@ -1,11 +1,11 @@
-const min_proposal_period : day = 3n;
-const max_proposal_period : day = 30n;
-const max_deferral        : day = 30n;
+const min_proposal_period : seconds_type = 3n;
+const max_proposal_period : seconds_type = 30n;
+const max_deferral        : seconds_type = 30n;
 
 function new_proposal(
-    const new_prop      : new_proposal;
-    var s               : storage)
-                        : storage is
+    const new_prop      : new_proposal_type;
+    var s               : storage_type)
+                        : storage_type is
   block {
     if new_prop.voting_period >= min_proposal_period
     then skip
@@ -65,15 +65,15 @@ function new_proposal(
 // } with s
 
 function add_vote(
-  var vote              : new_vote;
-  var s                 : storage)
-                        : storage is
+  var vote              : new_vote_type;
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Big_map.mem(vote.proposal, s.proposals)
     then skip
     else failwith("Gov/bad-proposal");
 
-    var proposal : proposal := getProposal(vote.proposal, s);
+    var proposal : proposal_type := getProposal(vote.proposal, s);
 
     if Tezos.now < proposal.end_date
     then skip
@@ -88,7 +88,7 @@ function add_vote(
     else skip;
 
     // TODO: check stake
-    var voters : voter_key := record [
+    var voters : voter_key_type := record [
       proposal          = vote.proposal;
       voter             = Tezos.sender;
     ];

@@ -1,7 +1,7 @@
 function transfer_ownership(
   const new_owner       : option(address);
-  var s                 : storage)
-                        : storage is
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Tezos.sender = s.owner
     then skip
@@ -15,8 +15,8 @@ function transfer_ownership(
   } with s
 
 function take_ownership(
-  var s                 : storage)
-                        : storage is
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Some(Tezos.sender) = s.pending_owner
     then skip
@@ -26,8 +26,8 @@ function take_ownership(
   } with s
 
 function cancel_transfer_ownership(
-  var s                 : storage)
-                        : storage is
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Tezos.sender = s.owner
     then skip
@@ -41,9 +41,9 @@ function cancel_transfer_ownership(
   } with s
 
 function set_proposal_setup(
-  const new_setup       : proposal_setup;
-  var s                 : storage)
-                        : storage is
+  const new_setup       : proposal_setup_type;
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Tezos.sender = s.owner
     then skip
@@ -63,15 +63,15 @@ function set_proposal_setup(
   } with s
 
 function ban_proposal(
-  const prop_id         : id;
-  var s                 : storage)
-                        : storage is
+  const prop_id         : id_type;
+  var s                 : storage_type)
+                        : storage_type is
   block {
     if Tezos.sender = s.owner
     then skip
     else failwith("Gov/not-owner");
 
-    var proposal : proposal := getProposal(prop_id, s);
+    var proposal : proposal_type := getProposal(prop_id, s);
 
     if Big_map.mem(prop_id, s.proposals)
     then skip

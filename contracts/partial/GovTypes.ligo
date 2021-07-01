@@ -1,35 +1,34 @@
-type id                 is nat
-type day                is nat
-type vote               is
+type id_type            is nat
+type vote_type          is
 | For
 | Against
 
-type voter_key          is [@layout:comb] record [
-  proposal                : id;
+type voter_key_type     is [@layout:comb] record [
+  proposal                : id_type;
   voter                   : address;
 ]
-type new_vote           is [@layout:comb] record [
-  proposal                : id;
-  vote                    : vote;
+type new_vote_type      is [@layout:comb] record [
+  proposal                : id_type;
+  vote                    : vote_type;
 ]
 
-type proposal_config    is [@layout:comb] record [
-  proposal_stake          : nat;
-  voting_quorum           : nat;
-  support_quorum          : nat
+type proposal_config_type is [@layout:comb] record [
+  proposal_stake            : nat;
+  voting_quorum             : nat;
+  support_quorum            : nat
 ]
 
-type settings           is
+type settings_type      is
     Proposal_stake      of nat
   | Voting_quorum       of nat
   | Support_quorum      of nat
 
-type proposal_setup     is [@layout:comb] record [
-  settings                : settings;
-  proposal                : nat;
+type proposal_setup_type is [@layout:comb] record [
+  settings                 : settings_type;
+  proposal                 : nat;
 ]
 
-type status is
+type status_type is
     Pending
   | Banned
   | Voting
@@ -38,36 +37,36 @@ type status is
   | Rejected
   | Activated
 
-type proposal           is [@layout:comb] record [
+type proposal_type      is [@layout:comb] record [
   ipfs_link               : bytes;
   forum_link              : bytes;
   votes_for               : nat;
   votes_against           : nat;
   start_date              : timestamp;
   end_date                : timestamp;
-  status                  : status;
-  config                  : proposal_config
+  status                  : status_type;
+  config                  : proposal_config_type
 ]
 
-type ipfs_link          is bytes
-type forum_link         is bytes
-type seconds            is nat
-type new_proposal       is [@layout:comb] record [
+
+type seconds_type       is nat
+
+type new_proposal_type  is [@layout:comb] record [
   ipfs_link               : bytes;
   forum_link              : bytes;
-  voting_period           : seconds;
-  deferral_period         : seconds;
+  voting_period           : seconds_type;
+  deferral_period         : seconds_type;
 ]
-type deferral           is day
 
-type storage            is [@layout:comb] record [
+
+type storage_type       is [@layout:comb] record [
   owner                   : address;
   id_count                : nat;
-  proposals               : big_map(id, proposal);
-  votes                   : big_map(voter_key, vote);
-  proposal_config         : proposal_config;
+  proposals               : big_map(id_type, proposal_type);
+  votes                   : big_map(voter_key_type, vote_type);
+  proposal_config         : proposal_config_type;
   pending_owner           : option (address)
 ]
 
-type return is list (operation) * storage
+type return is list (operation) * storage_type
 

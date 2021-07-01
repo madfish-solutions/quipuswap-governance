@@ -49,13 +49,13 @@ type proposal_type      is [@layout:comb] record [
 ]
 
 
-type seconds_type       is nat
+type seconds_type       is int
 
 type new_proposal_type  is [@layout:comb] record [
   ipfs_link               : bytes;
   forum_link              : bytes;
   voting_period           : seconds_type;
-  deferral_period         : seconds_type;
+  deferral                : seconds_type;
 ]
 
 

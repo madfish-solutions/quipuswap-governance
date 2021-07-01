@@ -1,6 +1,6 @@
-const min_proposal_period : seconds_type = 3n;
-const max_proposal_period : seconds_type = 30n;
-const max_deferral        : seconds_type = 30n;
+const min_proposal_period : seconds_type = 3 * 86_400;
+const max_proposal_period : seconds_type = 30 * 86_400;
+const max_deferral        : seconds_type = 30 * 86_400;
 
 function new_proposal(
     const new_prop      : new_proposal_type;
@@ -13,56 +13,34 @@ function new_proposal(
     if new_prop.voting_period <= max_proposal_period
     then skip
     else failwith("Gov/long-voting-perod");
+    var start_date : timestamp := Tezos.now;
+    var end_date: timestamp := Tezos.now + new_prop.voting_period;
+    var default_status := Voting;
 
-    const end_date: timestamp = Tezos.now + new_prop.voting_period * 86_400;
+    if new_prop.deferral = 0 then skip
+    else {
+      if new_prop.deferral > max_deferral then failwith("Gov/long-deferral")
+      else {
+        start_date := Tezos.now + new_prop.deferral;
+        end_date := end_date + new_prop.deferral;
+        default_status := Pending;
+      };
+    };
+
     s.proposals[s.id_count] := record [
-      ipfs_link = new_prop.ipfs_link;
-      forum_link = new_prop.forum_link;
-      votes_for = 0n;
-      votes_against = 0n;
-      start_date = Tezos.now;
-      end_date = end_date;
-      status =  Voting;
-      config = s.proposal_config;
+      ipfs_link               = new_prop.ipfs_link;
+      forum_link              = new_prop.forum_link;
+      votes_for               = 0n;
+      votes_against           = 0n;
+      start_date              = start_date;
+      end_date                = end_date;
+      status                  = default_status;
+      config                  = s.proposal_config;
     ];
 
-    s.id_count := s.id_count + 1n
+    s.id_count := s.id_count + 1n;
   } with s
 
-// function new_deferred_proposal(
-//     const ipfs_link     : bytes;
-//     const forum_link    : bytes;
-//     const voting_period : day;
-//     const deferral      : day;
-//     var s               : storage)
-//                         : storage is
-//   block {
-//     if voting_period >= min_proposal_period
-//     then skip
-//     else failwith("Gov/small-voting-perod");
-//     if voting_period <= max_proposal_period
-//     then skip
-//     else failwith("Gov/long-voting-perod");
-//     if deferral <= max_deferral
-//     then skip
-//     else failwith("Gov/long-voting-perod");
-
-//     const start_date : timestamp = Tezos.now + deferral * 86_400;
-//     const end_date :  timestamp = (Tezos.now + deferral * 86_400) +
-//       voting_period * 86_400;
-//     s.proposals[s.id_count] := record [
-//       ipfs_link         = ipfs_link;
-//       forum_link        = forum_link;
-//       votes_for         = 0n;
-//       votes_against     = 0n;
-//       start_date        = start_date;
-//       end_date          = end_date;
-//       status            = Pending;
-//       config            = s.proposal_config;
-//     ];
-
-//     s.id_count := s.id_count + 1n
-// } with s
 
 function add_vote(
   var vote              : new_vote_type;

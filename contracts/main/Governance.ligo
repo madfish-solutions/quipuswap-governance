@@ -10,9 +10,8 @@ type parameter is
   | Set_proposal_setup        of proposal_setup
   | Ban_proposal              of id
   | New_proposal              of new_proposal
-  | New_deferred_proposal     of new_deferred_proposal
   | Vote                      of new_vote
-
+// | New_deferred_proposal     of new_deferred_proposal
 function main(
   const action          : parameter;
   const s               : storage)
@@ -21,9 +20,8 @@ function main(
     | Transfer_ownership(params) -> ((nil : list(operation)), transfer_ownership(params, s))
     | Take_ownership(_) -> ((nil : list(operation)), take_ownership(s))
     | Cancel_transfer_ownership(_) -> ((nil : list(operation)), cancel_transfer_ownership(s))
-    | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params.0, params.1, s))
+    | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params, s))
     | Ban_proposal(params) -> ((nil : list(operation)), ban_proposal(params, s))
-    | New_proposal(params) -> ((nil : list(operation)), new_proposal(params.0, params.1, params.2, s))
-    | New_deferred_proposal(params) -> ((nil : list(operation)), new_deferred_proposal(params.0, params.1, params.2, params.3, s))
-    | Vote(params) -> ((nil : list(operation)), add_vote(params.0, params.1, s))
+    | New_proposal(params) -> ((nil : list(operation)), new_proposal(params, s))
+    | Vote(params) -> ((nil : list(operation)), add_vote(params, s))
   end

@@ -20,9 +20,9 @@ type proposal_config    is [@layout:comb] record [
 ]
 
 type settings           is
-    Proposal_stake
-  | Voting_quorum
-  | Support_quorum
+    Proposal_stake      of nat
+  | Voting_quorum       of nat
+  | Support_quorum      of nat
 
 type proposal_setup     is [@layout:comb] record [
   settings                : settings;
@@ -51,20 +51,20 @@ type proposal           is [@layout:comb] record [
 
 type ipfs_link          is bytes
 type forum_link         is bytes
-type voting_period      is day
+type seconds            is nat
 type new_proposal       is [@layout:comb] record [
   ipfs_link               : bytes;
   forum_link              : bytes;
-  voting_period           : voting_period;
+  voting_period           : seconds;
+  deferral_period         : seconds;
 ]
 type deferral           is day
 
-type new_deferred_proposal is (ipfs_link * forum_link * voting_period * deferral)
 type storage            is [@layout:comb] record [
   owner                   : address;
   id_count                : nat;
   proposals               : big_map(id, proposal);
-  votes                   : big_map(voter, vote);
+  votes                   : big_map(voter_key, vote);
   proposal_config         : proposal_config;
   pending_owner           : option (address)
 ]

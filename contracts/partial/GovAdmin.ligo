@@ -41,8 +41,7 @@ function cancel_transfer_ownership(
   } with s
 
 function set_proposal_setup(
-  const param           : settings;
-  const value           : nat;
+  const new_setup       : proposal_setup;
   var s                 : storage)
                         : storage is
   block {
@@ -50,15 +49,15 @@ function set_proposal_setup(
     then skip
     else failwith("Gov/not-owner");
 
-    case param of
-      Proposal_stake -> s := s with record [
-          proposal_config.proposal_stake = value
+    case new_setup.settings of
+      Proposal_stake (v) -> s := s with record [
+          proposal_config.proposal_stake = v
         ]
-    | Voting_quorum -> s := s with record [
-          proposal_config.voting_quorum = value
+    | Voting_quorum (v) -> s := s with record [
+          proposal_config.voting_quorum = v
         ]
-    | Support_quorum -> s := s with record [
-          proposal_config.support_quorum = value
+    | Support_quorum (v) -> s := s with record [
+          proposal_config.support_quorum = v
         ]
     end;
   } with s

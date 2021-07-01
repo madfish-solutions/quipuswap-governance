@@ -3,23 +3,21 @@ const max_proposal_period : day = 30n;
 const max_deferral        : day = 30n;
 
 function new_proposal(
-    const ipfs_link     : bytes;
-    const forum_link    : bytes;
-    const voting_period : day;
+    const new_prop      : new_proposal;
     var s               : storage)
                         : storage is
   block {
-    if voting_period >= min_proposal_period
+    if new_prop.voting_period >= min_proposal_period
     then skip
     else failwith("Gov/small-voting-perod");
-    if voting_period <= max_proposal_period
+    if new_prop.voting_period <= max_proposal_period
     then skip
     else failwith("Gov/long-voting-perod");
 
-    const end_date: timestamp = Tezos.now + voting_period * 86_400;
+    const end_date: timestamp = Tezos.now + new_prop.voting_period * 86_400;
     s.proposals[s.id_count] := record [
-      ipfs_link = ipfs_link;
-      forum_link = forum_link;
+      ipfs_link = new_prop.ipfs_link;
+      forum_link = new_prop.forum_link;
       votes_for = 0n;
       votes_against = 0n;
       start_date = Tezos.now;
@@ -31,52 +29,51 @@ function new_proposal(
     s.id_count := s.id_count + 1n
   } with s
 
-function new_deferred_proposal(
-    const ipfs_link     : bytes;
-    const forum_link    : bytes;
-    const voting_period : day;
-    const deferral      : day;
-    var s               : storage)
-                        : storage is
-  block {
-    if voting_period >= min_proposal_period
-    then skip
-    else failwith("Gov/small-voting-perod");
-    if voting_period <= max_proposal_period
-    then skip
-    else failwith("Gov/long-voting-perod");
-    if deferral <= max_deferral
-    then skip
-    else failwith("Gov/long-voting-perod");
+// function new_deferred_proposal(
+//     const ipfs_link     : bytes;
+//     const forum_link    : bytes;
+//     const voting_period : day;
+//     const deferral      : day;
+//     var s               : storage)
+//                         : storage is
+//   block {
+//     if voting_period >= min_proposal_period
+//     then skip
+//     else failwith("Gov/small-voting-perod");
+//     if voting_period <= max_proposal_period
+//     then skip
+//     else failwith("Gov/long-voting-perod");
+//     if deferral <= max_deferral
+//     then skip
+//     else failwith("Gov/long-voting-perod");
 
-    const start_date : timestamp = Tezos.now + deferral * 86_400;
-    const end_date :  timestamp = (Tezos.now + deferral * 86_400) +
-      voting_period * 86_400;
-    s.proposals[s.id_count] := record [
-      ipfs_link         = ipfs_link;
-      forum_link        = forum_link;
-      votes_for         = 0n;
-      votes_against     = 0n;
-      start_date        = start_date;
-      end_date          = end_date;
-      status            = Pending;
-      config            = s.proposal_config;
-    ];
+//     const start_date : timestamp = Tezos.now + deferral * 86_400;
+//     const end_date :  timestamp = (Tezos.now + deferral * 86_400) +
+//       voting_period * 86_400;
+//     s.proposals[s.id_count] := record [
+//       ipfs_link         = ipfs_link;
+//       forum_link        = forum_link;
+//       votes_for         = 0n;
+//       votes_against     = 0n;
+//       start_date        = start_date;
+//       end_date          = end_date;
+//       status            = Pending;
+//       config            = s.proposal_config;
+//     ];
 
-    s.id_count := s.id_count + 1n
-} with s
+//     s.id_count := s.id_count + 1n
+// } with s
 
 function add_vote(
-  const prop_id         : id;
-  const new_vote        : vote;
+  var vote              : new_vote;
   var s                 : storage)
                         : storage is
   block {
-    if Big_map.mem(prop_id, s.proposals)
+    if Big_map.mem(vote.proposal, s.proposals)
     then skip
     else failwith("Gov/bad-proposal");
 
-    var proposal : proposal := getProposal(prop_id, s);
+    var proposal : proposal := getProposal(vote.proposal, s);
 
     if Tezos.now < proposal.end_date
     then skip
@@ -90,14 +87,14 @@ function add_vote(
     then failwith("This proposal has been blocked by the administrator")
     else skip;
 
-    if not(Map.mem((prop_id, Tezos.sender), s.votes))
-    then skip
-    else failwith("You have already voted for this proposal");
-
     // TODO: check stake
+    var voters : voter_key := record [
+      proposal          = vote.proposal;
+      voter             = Tezos.sender;
+    ];
 
-    s.votes := Map.add((prop_id, (Tezos.sender: address)), new_vote, s.votes);
-    case new_vote of
+    s.votes := Map.add(voters, vote.vote, s.votes);
+    case vote.vote of
       For -> proposal.votes_for := proposal.votes_for + 1n
     | Against -> proposal.votes_against := proposal.votes_against + 1n
     end;
@@ -106,5 +103,5 @@ function add_vote(
     then proposal.status := Voting
     else skip;
 
-    s.proposals[prop_id] := proposal
+    s.proposals[vote.proposal] := proposal
   } with s

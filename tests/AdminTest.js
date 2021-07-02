@@ -1,44 +1,7 @@
 const { rejects, strictEqual, notStrictEqual } = require("assert");
 const { Tezos, signerAlice, signerBob } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
-const { alice } = require("../scripts/sandbox/accounts");
 const { bob } = require("../scripts/sandbox/accounts");
-
-const { confirmContract } = require("./utils/confirmation");
-
-async function awaitOwnershipContender(contract, addr) {
-  do {
-    var storage = await contract.storage();
-  } while (storage.pending_owner != addr);
-}
-
-async function awaitNewOwner(contract, addr) {
-  do {
-    var storage = await contract.storage();
-  } while (storage.owner != addr);
-}
-
-async function awaitChangeProposalSetup(contract, param) {
-  do {
-    var storage = await contract.storage();
-    var proposal_config = await storage.proposal_config;
-
-    if (param === "Proposal_stake") {
-      var prop_param = proposal_config.proposal_stake;
-    } else if (param === "Voting_quorum") {
-      var prop_param = proposal_config.voting_quorum;
-    } else {
-      var prop_param = proposal_config.support_quorum;
-    }
-  } while (prop_param.toNumber() === 4);
-}
-
-async function awaitBanProposal(contract) {
-  do {
-    var storage = await contract.storage();
-    var proposal = await storage.proposals.get(0);
-  } while (proposal.status["banned"] === undefined);
-}
 
 describe("Admin test", async function () {
   let contract;

@@ -49,17 +49,39 @@ function set_proposal_setup(
     then skip
     else failwith("Gov/not-owner");
 
-    case new_setup.settings of
-      Proposal_stake (v) -> s := s with record [
-          proposal_config.proposal_stake = v
-        ]
-    | Voting_quorum (v) -> s := s with record [
-          proposal_config.voting_quorum = v
-        ]
-    | Support_quorum (v) -> s := s with record [
-          proposal_config.support_quorum = v
-        ]
-    end;
+    case new_setup.proposal of
+      Id (v) -> {
+        if not(Big_map.mem(v, s.proposals))
+        then failwith("Gov/bad-proposal")
+        else {
+          var _proposal : proposal_type := getProposal(v, s);
+          case new_setup.settings of
+            Proposal_stake (val) -> _proposal := _proposal with record [
+              config.proposal_stake = val
+            ]
+          | Voting_quorum (val) -> _proposal := _proposal with record [
+              config.voting_quorum = val
+            ]
+          | Support_quorum (val) -> _proposal := _proposal with record [
+              config.support_quorum = val
+          ]
+          end;
+        }
+      }
+    | Null -> {
+        case new_setup.settings of
+          Proposal_stake (v) -> s := s with record [
+            proposal_config.proposal_stake = v
+          ]
+        | Voting_quorum (v) -> s := s with record [
+            proposal_config.voting_quorum = v
+          ]
+        | Support_quorum (v) -> s := s with record [
+            proposal_config.support_quorum = v
+          ]
+        end;
+    }
+  end
   } with s
 
 function ban_proposal(

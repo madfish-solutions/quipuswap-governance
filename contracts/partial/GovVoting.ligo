@@ -55,14 +55,14 @@ function add_vote(
 
     if Tezos.now < proposal.end_date
     then skip
-    else failwith("The voting period is over");
+    else failwith("Gov/voting-over");
 
     if Tezos.now >= proposal.start_date
     then skip
-    else failwith("Voting has not started yet");
+    else failwith("Gov/voting-not-started");
 
     if proposal.status = Banned
-    then failwith("This proposal has been blocked by the administrator")
+    then failwith("Gov/proposal-banned")
     else skip;
 
     // TODO: check stake

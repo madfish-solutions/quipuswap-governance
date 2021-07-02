@@ -68,9 +68,8 @@ describe("Admin test", async function () {
       const { storages } = require("./storage/storage");
       let deployedContract = await migrate(Tezos, "Governance", storages[q]);
       contract = await Tezos.contract.at(deployedContract);
-      //   contract = await confirmContract(Tezos, deployedContract);
     } catch (e) {
-      console.log(e, 111111111111);
+      console.log(e);
     }
   });
 
@@ -85,7 +84,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it("Сannot transfer ownership to someone else if someone is already in the transfer pending", async function () {
+    it("Сannot transfer ownership if someone is already in the transfer pending", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         contract.methods.transfer_ownership(bob.pkh).send(),

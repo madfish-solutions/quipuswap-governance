@@ -45,8 +45,7 @@ describe("Admin test", async function () {
 
   var s = [
     "withProposals",
-    "defaultStorage",
-    "defaultStorage",
+    "withProposals",
     "defaultStorage",
     "defaultStorage",
     "defaultStorage",
@@ -56,7 +55,9 @@ describe("Admin test", async function () {
     "withPendingOwnershipBob",
     "defaultStorage",
     "defaultStorage",
-    "withPendingOwnershipEve",
+    "withPendingOwnershipBob",
+    "defaultStorage",
+    "defaultStorage",
     "withPendingOwnershipBob",
     "defaultStorage",
   ];
@@ -66,9 +67,10 @@ describe("Admin test", async function () {
     try {
       const { storages } = require("./storage/storage");
       let deployedContract = await migrate(Tezos, "Governance", storages[q]);
-      contract = await confirmContract(Tezos, deployedContract);
+      contract = await Tezos.contract.at(deployedContract);
+      //   contract = await confirmContract(Tezos, deployedContract);
     } catch (e) {
-      console.log(e);
+      console.log(e, 111111111111);
     }
   });
 
@@ -77,44 +79,26 @@ describe("Admin test", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         contract.methods.transfer_ownership(bob.pkh).send(),
-        (err) => {
-          strictEqual(err.message, "This method is for the owner only");
+        err => {
+          strictEqual(err.message, "Gov/not-owner");
           return true;
-        }
-      );
-    });
-    it("Сannot transfer ownership to someone who is already awaiting the transfer", async function () {
-      Tezos.setSignerProvider(signerAlice);
-      await rejects(
-        contract.methods.transfer_ownership(bob.pkh).send(),
-        (err) => {
-          strictEqual(
-            err.message,
-            "You are already transferring ownership to this account"
-          );
-          return true;
-        }
+        },
       );
     });
     it("Сannot transfer ownership to someone else if someone is already in the transfer pending", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         contract.methods.transfer_ownership(bob.pkh).send(),
-        (err) => {
-          strictEqual(
-            err.message,
-            "You are already transferring ownership to someone"
-          );
+        err => {
+          strictEqual(err.message, "Gov/no-pending-admin");
           return true;
-        }
+        },
       );
     });
     it("Successful transfer of ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await contract.methods.transfer_ownership(bob.pkh).send();
-      await awaitOwnershipContender(contract, bob.pkh).catch((err) => {
-        console.log(err);
-      });
+      let op = await contract.methods.transfer_ownership(bob.pkh).send();
+      await op.confirmation();
       let storage = await contract.storage();
       strictEqual(bob.pkh, storage.pending_owner);
     });
@@ -122,20 +106,15 @@ describe("Admin test", async function () {
   describe("Testing entrypoint: Take_ownership", async function () {
     it("Cannot take ownership, if does not in pending to transfer of ownership", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(contract.methods.take_ownership(["unit"]).send(), (err) => {
-        strictEqual(
-          err.message,
-          "You are not claiming to be the owner of the contract"
-        );
+      await rejects(contract.methods.take_ownership(["unit"]).send(), err => {
+        strictEqual(err.message, "Gov/not-pending-owner");
         return true;
       });
     });
     it("Bob successfully became the new owner", async function () {
       Tezos.setSignerProvider(signerBob);
-      await contract.methods.take_ownership(["unit"]).send();
-      await awaitNewOwner(contract, bob.pkh).catch((err) => {
-        console.log(err);
-      });
+      let op = await contract.methods.take_ownership(["unit"]).send();
+      await op.confirmation();
       let storage = await contract.storage();
       strictEqual(storage.owner, bob.pkh);
     });
@@ -145,70 +124,71 @@ describe("Admin test", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         contract.methods.cancel_transfer_ownership(["unit"]).send(),
-        (err) => {
-          strictEqual(err.message, "This method is for the owner only");
+        err => {
+          strictEqual(err.message, "Gov/not-owner");
           return true;
-        }
+        },
       );
     });
-    it('failwith("You do not transfer ownership")', async function () {
+    it('failwith("Gov/no-pending-admin")', async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         contract.methods.cancel_transfer_ownership(["unit"]).send(),
-        (err) => {
-          strictEqual(err.message, "You do not transfer ownership");
+        err => {
+          strictEqual(err.message, "Gov/no-pending-admin");
           return true;
-        }
+        },
       );
+    });
+    it("Successfully cancel transfer ownership", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      let op = await contract.methods
+        .cancel_transfer_ownership(["unit"])
+        .send();
+      await op.confirmation();
+      let storage = await contract.storage();
+      strictEqual(storage.pending_owner, null);
     });
   });
   describe("Testing entrypoint: set_proposal_setup", async function () {
     it("Only the owner can call this method", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
-        contract.methods.set_proposal_setup("proposal_stake", "unit", 5).send(),
-        (err) => {
-          strictEqual(err.message, "This method is for the owner only");
+        contract.methods
+          .set_proposal_setup("proposal_stake", 5, "null", "unit")
+          .send(),
+        err => {
+          strictEqual(err.message, "Gov/not-owner");
           return true;
-        }
+        },
       );
     });
     it("Successfully changed: Proposal_stake", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await contract.methods
-        .set_proposal_setup("proposal_stake", "unit", 5)
+      let op = await contract.methods
+        .set_proposal_setup("proposal_stake", 5, "null", "unit")
         .send();
-      await awaitChangeProposalSetup(contract, "Proposal_stake").catch(
-        (err) => {
-          console.log(err);
-        }
-      );
+      await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.proposal_stake.toNumber(), 5);
     });
     it("Successfully changed: Voting_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await contract.methods
-        .set_proposal_setup("voting_quorum", "unit", 5)
+      let op = await contract.methods
+        .set_proposal_setup("voting_quorum", 5, "null", "unit")
         .send();
-      await awaitChangeProposalSetup(contract, "Voting_quorum").catch((err) => {
-        console.log(err);
-      });
+      await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.voting_quorum.toNumber(), 5);
     });
     it("Successfully changed: Support_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await contract.methods
-        .set_proposal_setup("support_quorum", "unit", 5)
+      let op = await contract.methods
+        .set_proposal_setup("support_quorum", 5, "null", "unit")
         .send();
-      await awaitChangeProposalSetup(contract, "Support_quorum").catch(
-        (err) => {
-          console.log(err);
-        }
-      );
+      await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.support_quorum.toNumber(), 5);
@@ -217,24 +197,29 @@ describe("Admin test", async function () {
   describe("Testing entrypoint: ban_proposal", async function () {
     it("Only the owner can call this method", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(contract.methods.ban_proposal(0).send(), (err) => {
-        strictEqual(err.message, "This method is for the owner only");
+      await rejects(contract.methods.ban_proposal(0).send(), err => {
+        strictEqual(err.message, "Gov/not-owner");
         return true;
       });
     });
     it("Invalid proposal id", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(contract.methods.ban_proposal(1).send(), (err) => {
-        strictEqual(err.message, "Invalid proposal id");
+      await rejects(contract.methods.ban_proposal(1).send(), err => {
+        strictEqual(err.message, "Gov/no-proposal-id");
+        return true;
+      });
+    });
+    it("Bad proposal status", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(contract.methods.ban_proposal(3).send(), err => {
+        strictEqual(err.message, "Gov/bad-proposal-status");
         return true;
       });
     });
     it("Successfully ban proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await contract.methods.ban_proposal(0).send();
-      await awaitBanProposal(contract).catch((err) => {
-        console.log(err);
-      });
+      let op = await contract.methods.ban_proposal(0).send();
+      await op.confirmation();
       let storage = await contract.storage();
       let proposal = await storage.proposals.get(0);
       notStrictEqual(undefined, proposal.status["banned"]);

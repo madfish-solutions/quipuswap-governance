@@ -3,7 +3,7 @@
 #include "../partial/GovAdmin.ligo"
 #include "../partial/GovVoting.ligo"
 
-type parameter is
+type parameter_type is
   | Transfer_ownership        of (option(address))
   | Take_ownership            of unit
   | Cancel_transfer_ownership of unit
@@ -11,13 +11,13 @@ type parameter is
   | Ban_proposal              of id_type
   | New_proposal              of new_proposal_type
   | Vote                      of new_vote_type
-// | New_deferred_proposal     of new_deferred_proposal
+
 function main(
-  const action          : parameter;
+  const action          : parameter_type;
   const s               : storage_type)
                         : return is
   case action of
-    | Transfer_ownership(params) -> ((nil : list(operation)), transfer_ownership(params, s))
+      Transfer_ownership(params) -> ((nil : list(operation)), transfer_ownership(params, s))
     | Take_ownership(_) -> ((nil : list(operation)), take_ownership(s))
     | Cancel_transfer_ownership(_) -> ((nil : list(operation)), cancel_transfer_ownership(s))
     | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params, s))

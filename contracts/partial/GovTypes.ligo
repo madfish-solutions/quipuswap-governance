@@ -23,9 +23,13 @@ type settings_type      is
   | Voting_quorum       of nat
   | Support_quorum      of nat
 
+type some_proposal_type is
+    Id                  of nat
+  | Null                of unit
+
 type proposal_setup_type is [@layout:comb] record [
   settings                 : settings_type;
-  proposal                 : nat;
+  proposal                 : some_proposal_type;
 ]
 
 type status_type is

@@ -90,6 +90,7 @@ const migrate = async (tezos, contract, storage) => {
       `${env.buildsDir}/${contract}.json`,
       JSON.stringify(artifacts, null, 2)
     );
+    await operation.confirmation();
     return operation.contractAddress;
   } catch (e) {
     console.error(e);

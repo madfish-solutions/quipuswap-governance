@@ -54,9 +54,11 @@ function new_proposal(
 
     s.locked_balances[staker_key] := stake_amount;
 
-    const transfer_param : transfer_param_type =
-      get_tx_param(Tezos.self_address, stake_amount);
-    // Tezos.transaction(list[transfer_param], 0mutez, con)
+    Tezos.transaction(
+      get_tx_param(Tezos.self_address, stake_amount),
+      0mutez,
+      get_tranfer_contract(unit)
+    );
   } with s
 
 
@@ -103,6 +105,10 @@ function add_vote(
     end;
     s.proposals[vote.proposal] := proposal;
 
+    if proposal.status = Pending
+    then proposal.status := Voting
+    else skip;
+
     (* Stake part *)
     const staker_key : staker_key_type = record [
       account           = Tezos.sender;
@@ -113,17 +119,10 @@ function add_vote(
 
     s.locked_balances[staker_key] := locked_balance + votes;
 
-    const transfer_param : transfer_param_type = get_tx_param(Tezos.self_address, votes);
-
-    const con : contract(transfer_type) =
-    case (Tezos.get_entrypoint_opt("%transfer", ("KT1DHYr4e8nDUeZst2RTgrs7u6os31g6xuJA":address)) : option(contract(transfer_type))) of
-      Some(contr)        -> contr
-    | None               -> (failwith("Gov/not-token") : contract(transfer_type))
-    end;
-    // Tezos.transaction(list[transfer_param], 0mutez, con)
-
-    if proposal.status = Pending
-    then proposal.status := Voting
-    else skip;
+    Tezos.transaction(
+      get_tx_param(Tezos.self_address, votes),
+      0mutez,
+      get_tranfer_contract(unit)
+    );
 
   } with s ;

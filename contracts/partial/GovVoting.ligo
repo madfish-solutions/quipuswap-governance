@@ -28,6 +28,7 @@ function new_proposal(
     };
 
     s.proposals[s.id_count] := record [
+      creator                 = Tezos.sender;
       ipfs_link               = new_prop.ipfs_link;
       forum_link              = new_prop.forum_link;
       votes_for               = 0n;
@@ -39,6 +40,23 @@ function new_proposal(
     ];
 
     s.id_count := s.id_count + 1n;
+
+    (* Stake part *)
+    // TODO
+    const total_supply : nat = 10n;
+    const stake_amount : nat =
+      total_supply * s.proposal_config.proposal_stake / 100n;
+
+    const staker_key : staker_key_type = record [
+      account           = Tezos.sender;
+      proposal          = abs(s.id_count - 1n);
+    ];
+
+    s.locked_balances[staker_key] := stake_amount;
+
+    const transfer_param : transfer_param_type =
+      get_tx_param(Tezos.self_address, stake_amount);
+    // Tezos.transaction(list[transfer_param], 0mutez, con)
   } with s
 
 
@@ -65,21 +83,47 @@ function add_vote(
     then failwith("Gov/proposal-banned")
     else skip;
 
-    // TODO: check stake
     var voters : voter_key_type := record [
       proposal          = vote.proposal;
       voter             = Tezos.sender;
     ];
 
     s.votes := Map.add(voters, vote.vote, s.votes);
+
+    var votes : nat := 0n;
     case vote.vote of
-      For -> proposal.votes_for := proposal.votes_for + 1n
-    | Against -> proposal.votes_against := proposal.votes_against + 1n
+      For (v) -> {
+        proposal.votes_for := proposal.votes_for + v;
+        votes := v;
+      }
+    | Against (v) -> {
+        proposal.votes_against := proposal.votes_against + v;
+        votes := v;
+      }
     end;
+    s.proposals[vote.proposal] := proposal;
+
+    (* Stake part *)
+    const staker_key : staker_key_type = record [
+      account           = Tezos.sender;
+      proposal          = vote.proposal;
+    ];
+
+    const locked_balance : nat = get_locked_balance(staker_key, s);
+
+    s.locked_balances[staker_key] := locked_balance + votes;
+
+    const transfer_param : transfer_param_type = get_tx_param(Tezos.self_address, votes);
+
+    const con : contract(transfer_type) =
+    case (Tezos.get_entrypoint_opt("%transfer", ("KT1DHYr4e8nDUeZst2RTgrs7u6os31g6xuJA":address)) : option(contract(transfer_type))) of
+      Some(contr)        -> contr
+    | None               -> (failwith("Gov/not-token") : contract(transfer_type))
+    end;
+    // Tezos.transaction(list[transfer_param], 0mutez, con)
 
     if proposal.status = Pending
     then proposal.status := Voting
     else skip;
 
-    s.proposals[vote.proposal] := proposal
-  } with s
+  } with s ;

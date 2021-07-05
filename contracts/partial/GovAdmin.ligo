@@ -106,6 +106,19 @@ function ban_proposal(
     proposal.status := Banned;
     s.proposals[prop_id] := proposal;
 
-    // TODO burn tokens
+    (* Burning stake *)
+    const staker_key : staker_key_type = record [
+      account           = proposal.creator;
+      proposal          = prop_id;
+    ];
 
+    const locked_balance : nat = get_locked_balance(staker_key, s);
+
+    s.locked_balances := rem_balance(staker_key, s.locked_balances);
+
+    Tezos.transaction(
+      get_tx_param(zero_address, locked_balance),
+      0mutez,
+      get_tranfer_contract(unit)
+    );
   } with s

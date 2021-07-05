@@ -33,9 +33,9 @@ function get_locked_balance(
 
 
 function get_tx_param(
-    const to_            : address;
-    const value          : nat)
-                        : transfer_param_type is
+    const to_           : address;
+    const value         : nat)
+                        : list(transfer_param_type) is
   block {
     const transfer_destination : transfer_destination_type = record [
       to_               = to_;
@@ -46,7 +46,7 @@ function get_tx_param(
       from_             = Tezos.sender;
       txs               = list[transfer_destination];
     ];
-  } with transfer_param
+  } with list[transfer_param]
 
 
 // function get_supply(const token_address : address) : contract() is
@@ -55,8 +55,17 @@ function get_tx_param(
 //     | None -> (failwith("GOV/not-supply") : contract())
 //   end;
 
-function rem (var m : register) : register is
+function rem_balance (
+  const key             : staker_key_type;
+  var s                 : locked_balances_type)
+                        : locked_balances_type is
   block {
-    remove ("tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN": address) from map moves
-  } with m
+    remove key from map s
+  } with s
 
+
+function get_tranfer_contract(const _unit : unit) : contract(transfer_type) is
+  case (Tezos.get_entrypoint_opt("%transfer", qnot_address) : option(contract(transfer_type))) of
+    Some(contr) -> contr
+    | None -> (failwith("Gov/not-token") : contract(transfer_type))
+  end;

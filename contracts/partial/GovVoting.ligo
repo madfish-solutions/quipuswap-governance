@@ -5,7 +5,7 @@ const max_deferral        : seconds_type = 30 * 86_400;
 function new_proposal(
     const new_prop      : new_proposal_type;
     var s               : storage_type)
-                        : storage_type is
+                        : return is
   block {
     if new_prop.voting_period >= min_proposal_period
     then skip
@@ -54,18 +54,18 @@ function new_proposal(
 
     s.locked_balances[staker_key] := stake_amount;
 
-    Tezos.transaction(
+    const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, stake_amount),
       0mutez,
       get_tranfer_contract(unit)
     );
-  } with s
+  } with ((list[op] : list (operation)), s)
 
 
 function add_vote(
   var vote              : new_vote_type;
   var s                 : storage_type)
-                        : storage_type is
+                        : return is
   block {
     if Big_map.mem(vote.proposal, s.proposals)
     then skip
@@ -103,11 +103,12 @@ function add_vote(
         votes := v;
       }
     end;
-    s.proposals[vote.proposal] := proposal;
 
     if proposal.status = Pending
     then proposal.status := Voting
     else skip;
+
+    s.proposals[vote.proposal] := proposal;
 
     (* Stake part *)
     const staker_key : staker_key_type = record [
@@ -119,10 +120,10 @@ function add_vote(
 
     s.locked_balances[staker_key] := locked_balance + votes;
 
-    Tezos.transaction(
+    const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, votes),
       0mutez,
       get_tranfer_contract(unit)
     );
 
-  } with s ;
+  } with ((list[op] : list (operation)), s)

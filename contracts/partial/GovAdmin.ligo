@@ -87,7 +87,7 @@ function set_proposal_setup(
 function ban_proposal(
   const prop_id         : id_type;
   var s                 : storage_type)
-                        : storage_type is
+                        : return is
   block {
     if Tezos.sender = s.owner
     then skip
@@ -116,9 +116,9 @@ function ban_proposal(
 
     s.locked_balances := rem_balance(staker_key, s.locked_balances);
 
-    Tezos.transaction(
+    const op : operation = transaction(
       get_tx_param(zero_address, locked_balance),
       0mutez,
       get_tranfer_contract(unit)
     );
-  } with s
+  } with ((list[op] : list (operation)), s)

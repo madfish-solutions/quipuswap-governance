@@ -21,7 +21,7 @@ function main(
     | Take_ownership(_) -> ((nil : list(operation)), take_ownership(s))
     | Cancel_transfer_ownership(_) -> ((nil : list(operation)), cancel_transfer_ownership(s))
     | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params, s))
-    | Ban_proposal(params) -> ((nil : list(operation)), ban_proposal(params, s))
-    | New_proposal(params) -> ((nil : list(operation)), new_proposal(params, s))
-    | Vote(params) -> ((nil : list(operation)), add_vote(params, s))
+    | Ban_proposal(params) -> ban_proposal(params, s)
+    | New_proposal(params) -> new_proposal(params, s)
+    | Vote(params) -> add_vote(params, s)
   end

@@ -50,7 +50,8 @@ type proposal_type      is [@layout:comb] record [
   start_date              : timestamp;
   end_date                : timestamp;
   status                  : status_type;
-  config                  : proposal_config_type
+  config                  : proposal_config_type;
+  fixed_supply            : nat;
 ]
 
 
@@ -63,17 +64,6 @@ type new_proposal_type  is [@layout:comb] record [
   deferral                : seconds_type;
 ]
 
-// type proposal_stake_type is [@layout:comb] record [
-//   proposal                : id_type;
-//   amount                  : nat;
-// ]
-
-
-// type locked_balance_type is [@layout:comb] record [
-//   proposals               : set(proposal_stake_type);
-//   tvl                     : nat;
-//   claim                   : nat;
-// ]
 
 type staker_key_type    is [@layout:comb] record [
   account                 : address;

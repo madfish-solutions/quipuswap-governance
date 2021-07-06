@@ -10,6 +10,7 @@ type parameter_type is
   | Set_proposal_setup        of proposal_setup_type
   | Ban_proposal              of id_type
   | New_proposal              of new_proposal_type
+  | Receive_reserves          of receive_reserves_type
   | Vote                      of new_vote_type
 
 function main(
@@ -22,6 +23,7 @@ function main(
     | Cancel_transfer_ownership(_) -> ((nil : list(operation)), cancel_transfer_ownership(s))
     | Set_proposal_setup(params) -> ((nil : list(operation)), set_proposal_setup(params, s))
     | Ban_proposal(params) -> ban_proposal(params, s)
-    | New_proposal(params) -> new_proposal(params, s)
+    | New_proposal(params) -> get_total_supply(params, s)
+    | Receive_reserves (params) -> (receive_reserves(params, s))
     | Vote(params) -> add_vote(params, s)
   end

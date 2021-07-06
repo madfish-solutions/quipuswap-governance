@@ -2,11 +2,31 @@ const min_proposal_period : seconds_type = 3 * 86_400;
 const max_proposal_period : seconds_type = 30 * 86_400;
 const max_deferral        : seconds_type = 30 * 86_400;
 
-function new_proposal(
-    const new_prop      : new_proposal_type;
+function get_total_supply(
+  const new_prop        : new_proposal_type;
+  var s                     : storage_type)
+                        : return is
+  block {
+    s.temp_proposal_cache[Tezos.sender] := new_prop;
+  } with (list[
+    Tezos.transaction(
+      get_callback(Tezos.self_address),
+      0mutez,
+      get_supply_entrypoint(qnot_address))
+  ], s)
+
+function receive_reserves(
+    const total_supply  : nat;
     var s               : storage_type)
                         : return is
   block {
+    if Tezos.sender = qnot_address then skip
+    else failwith("GOV/unknown-sender");
+    const new_prop: new_proposal_type = get_prop_cache(Tezos.source, s);
+    const updated_prop_cache : prop_cache_type =
+      rem_prop_cache(Tezos.source, s.temp_proposal_cache);
+    s.temp_proposal_cache := updated_prop_cache;
+
     if new_prop.voting_period >= min_proposal_period
     then skip
     else failwith("Gov/small-voting-perod");
@@ -42,8 +62,6 @@ function new_proposal(
     s.id_count := s.id_count + 1n;
 
     (* Stake part *)
-    // TODO
-    const total_supply : nat = 10n;
     const stake_amount : nat =
       total_supply * s.proposal_config.proposal_stake / 100n;
 

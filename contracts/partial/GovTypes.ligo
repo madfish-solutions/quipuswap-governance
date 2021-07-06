@@ -82,6 +82,8 @@ type staker_key_type    is [@layout:comb] record [
 
 type locked_balances_type is big_map(staker_key_type, nat)
 
+type prop_cache_type is big_map(address, new_proposal_type)
+
 type storage_type       is [@layout:comb] record [
   owner                   : address;
   id_count                : nat;
@@ -89,7 +91,8 @@ type storage_type       is [@layout:comb] record [
   votes                   : big_map(voter_key_type, vote_type);
   locked_balances         : locked_balances_type;
   proposal_config         : proposal_config_type;
-  pending_owner           : option (address)
+  pending_owner           : option (address);
+  temp_proposal_cache     : prop_cache_type;
 ]
 
 type return is list (operation) * storage_type
@@ -104,8 +107,11 @@ type transfer_param_type is [@layout:comb] record [
     txs                   : list(transfer_destination_type);
   ]
 
+type transfer_type       is list(transfer_param_type)
 
-type transfer_type is list(transfer_param_type)
+type receive_reserves_type is nat
+
+type get_supply_type is (contract(receive_reserves_type))
 
 [@inline] const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

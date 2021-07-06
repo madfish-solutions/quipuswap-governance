@@ -48,7 +48,7 @@ function receive_reserves(
     };
 
     s.proposals[s.id_count] := record [
-      creator                 = Tezos.sender;
+      creator                 = Tezos.source;
       ipfs_link               = new_prop.ipfs_link;
       forum_link              = new_prop.forum_link;
       votes_for               = 0n;
@@ -66,14 +66,18 @@ function receive_reserves(
       total_supply * s.proposal_config.proposal_stake / 100n;
 
     const staker_key : staker_key_type = record [
-      account           = Tezos.sender;
+      account           = Tezos.source;
       proposal          = abs(s.id_count - 1n);
     ];
 
-    s.locked_balances[staker_key] := stake_amount;
+    var balances : staker_map_type := s.locked_balances.balances;
+    balances[staker_key] := stake_amount;
+    s.locked_balances := s.locked_balances with record[
+      balances = balances;
+    ];
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.self_address, stake_amount),
+      get_tx_param(Tezos.source, Tezos.self_address, stake_amount),
       0mutez,
       get_tranfer_contract(unit)
     );
@@ -89,7 +93,7 @@ function add_vote(
     then skip
     else failwith("Gov/bad-proposal");
 
-    var proposal : proposal_type := getProposal(vote.proposal, s);
+    var proposal : proposal_type := get_proposal(vote.proposal, s);
 
     if Tezos.now < proposal.end_date
     then skip
@@ -134,14 +138,55 @@ function add_vote(
       proposal          = vote.proposal;
     ];
 
-    const locked_balance : nat = get_locked_balance(staker_key, s);
+    const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
+    var balances : staker_map_type := s.locked_balances.balances;
 
-    s.locked_balances[staker_key] := locked_balance + votes;
+    balances[staker_key] := locked_balance + votes;
+    s.locked_balances := s.locked_balances with record [
+      balances = balances;
+    ];
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.self_address, votes),
+      get_tx_param(Tezos.sender, Tezos.self_address, votes),
       0mutez,
       get_tranfer_contract(unit)
     );
 
   } with ((list[op] : list (operation)), s)
+
+
+function claim(
+  var s                 : storage_type)
+                        : return is
+  block {
+    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
+    var claim_amount : nat := 0n;
+    for i in set user_props block {
+      const proposal : proposal_type = get_proposal(i, s);
+      const invalid_status = set[Pending; Voting];
+
+      if Set.mem(proposal.status, invalid_status)
+      then skip
+      else {
+        const staker_key : staker_key_type = record [
+          account           = Tezos.sender;
+          proposal          = i;
+        ];
+
+        const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
+        var balances : staker_map_type := s.locked_balances.balances;
+
+        claim_amount := claim_amount + locked_balance;
+        s.locked_balances.balances := rem_balance(staker_key, s.locked_balances.balances);
+        user_props := Set.remove(i, user_props);
+        s.locked_balances.proposals[Tezos.sender] := user_props;
+      };
+    };
+    const op : operation = Tezos.transaction(
+      get_tx_param(Tezos.self_address, Tezos.sender, claim_amount),
+      0mutez,
+      get_tranfer_contract(unit)
+    );
+
+  } with ((list[op] : list (operation)), s)
+

@@ -80,8 +80,14 @@ type staker_key_type    is [@layout:comb] record [
   proposal                : id_type;
 ]
 
-type locked_balances_type is big_map(staker_key_type, nat)
+type staker_map_type is big_map(staker_key_type, nat)
 
+type staker_proposals_type is big_map(address, set(nat))
+
+type locked_balances_type is [@layout:comb] record [
+  balances                : staker_map_type;
+  proposals               : staker_proposals_type ;
+]
 type prop_cache_type is big_map(address, new_proposal_type)
 
 type storage_type       is [@layout:comb] record [

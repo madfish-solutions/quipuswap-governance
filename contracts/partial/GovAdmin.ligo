@@ -54,7 +54,7 @@ function set_proposal_setup(
         if not(Big_map.mem(v, s.proposals))
         then failwith("Gov/bad-proposal")
         else {
-          var _proposal : proposal_type := getProposal(v, s);
+          var _proposal : proposal_type := get_proposal(v, s);
           case new_setup.settings of
             Proposal_stake (val) -> _proposal := _proposal with record [
               config.proposal_stake = val
@@ -93,7 +93,7 @@ function ban_proposal(
     then skip
     else failwith("Gov/not-owner");
 
-    var proposal : proposal_type := getProposal(prop_id, s);
+    var proposal : proposal_type := get_proposal(prop_id, s);
 
     if Big_map.mem(prop_id, s.proposals)
     then skip
@@ -112,12 +112,15 @@ function ban_proposal(
       proposal          = prop_id;
     ];
 
-    const locked_balance : nat = get_locked_balance(staker_key, s);
+    const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
 
-    s.locked_balances := rem_balance(staker_key, s.locked_balances);
+    s.locked_balances.balances := rem_balance(staker_key, s.locked_balances.balances);
+    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
+    user_props := Set.remove(prop_id, user_props);
+    s.locked_balances.proposals[proposal.creator] := user_props;
 
     const op : operation = transaction(
-      get_tx_param(zero_address, locked_balance),
+      get_tx_param(proposal.creator, zero_address, locked_balance),
       0mutez,
       get_tranfer_contract(unit)
     );

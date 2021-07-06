@@ -15,6 +15,7 @@ function get_total_supply(
       get_supply_entrypoint(qnot_address))
   ], s)
 
+(* Create new proposal *)
 function receive_reserves(
     const total_supply  : nat;
     var s               : storage_type)
@@ -57,6 +58,7 @@ function receive_reserves(
       end_date                = end_date;
       status                  = default_status;
       config                  = s.proposal_config;
+      fixed_supply            = total_supply;
     ];
 
     s.id_count := s.id_count + 1n;
@@ -190,3 +192,41 @@ function claim(
 
   } with ((list[op] : list (operation)), s)
 
+
+function finalize_voting(
+  const prop_id         : id_type;
+  var s                 : storage_type)
+                        : storage_type is
+  block {
+    var proposal : proposal_type := get_proposal(prop_id, s);
+
+    if proposal.status = Voting then skip
+    else failwith("Gov/proposal-ended");
+
+    if Tezos.now > proposal.end_date then skip
+    else failwith("Gov/voting-period");
+    const votes : nat = proposal.votes_for + proposal.votes_against;
+    if ( votes >= proposal.config.voting_quorum * proposal.fixed_supply / 100n)
+    then {
+      if (votes >= proposal.config.support_quorum * votes / 100n)
+      then proposal.status := Approved;
+      else proposal.status := Rejected;
+    } else proposal.status := Underrated;
+
+    s.proposals[prop_id] := proposal;
+  } with s
+
+
+ function activate_proposal(
+  const prop_id         : id_type;
+  var s                 : storage_type)
+                        : storage_type is
+  block {
+    var proposal : proposal_type := get_proposal(prop_id, s);
+
+    if proposal.status = Approved then skip
+    else failwith("Gov/not-approved");
+
+    proposal.status := Activated;
+    s.proposals[prop_id] := proposal;
+  } with s

@@ -1,5 +1,5 @@
 const { rejects, strictEqual, notStrictEqual } = require("assert");
-const { Tezos, signerAlice, signerBob } = require("./utils/cli");
+const { Tezos, signerAlice, signerBob, alice } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
 const { bob } = require("../scripts/sandbox/accounts");
 
@@ -167,7 +167,7 @@ describe("Admin test", async function () {
     it("Invalid proposal id", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(contract.methods.ban_proposal(1).send(), err => {
-        strictEqual(err.message, "Gov/no-proposal-id");
+        strictEqual(err.message, "Gov/not-prop-id");
         return true;
       });
     });
@@ -180,6 +180,22 @@ describe("Admin test", async function () {
     });
     it("Successfully ban proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
+      const { getDeploydAddress } = require("../scripts/helpers");
+      const { address } = require("../scripts/sandbox/fa2_latest.json");
+      fa2_contract = await Tezos.contract.at(address);
+      const update_op = await fa2_contract.methods
+        .update_operators([
+          {
+            add_operator: {
+              owner: alice.pkh,
+              operator: getDeploydAddress("Governance"),
+              token_id: 0,
+            },
+          },
+        ])
+        .send();
+      await update_op.confirmation();
+
       let op = await contract.methods.ban_proposal(0).send();
       await op.confirmation();
       let storage = await contract.storage();

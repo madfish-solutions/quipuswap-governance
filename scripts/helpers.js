@@ -5,48 +5,48 @@ const { TezosToolkit } = require("@taquito/taquito");
 const { InMemorySigner } = require("@taquito/signer");
 const env = require("../env");
 
-const getLigo = (isDockerizedLigo) => {
-    let path = "ligo";
-    if (isDockerizedLigo) {
-        path = `docker run -v $PWD:$PWD --rm -i ligolang/ligo:${env.ligoVersion}`;
-        try {
-            execSync(`${path}  --help`);
-        } catch (err) {
-            path = "ligo";
-            execSync(`${path}  --help`);
-        }
-    } else {
-        try {
-            execSync(`${path}  --help`);
-        } catch (err) {
-            path = `docker run -v $PWD:$PWD --rm -i ligolang/ligo:${env.ligoVersion}`;
-            execSync(`${path}  --help`);
-        }
+const getLigo = isDockerizedLigo => {
+  let path = "ligo";
+  if (isDockerizedLigo) {
+    path = `docker run -v $PWD:$PWD --rm -i ligolang/ligo:${env.ligoVersion}`;
+    try {
+      execSync(`${path}  --help`);
+    } catch (err) {
+      path = "ligo";
+      execSync(`${path}  --help`);
     }
-    return path;
+  } else {
+    try {
+      execSync(`${path}  --help`);
+    } catch (err) {
+      path = `docker run -v $PWD:$PWD --rm -i ligolang/ligo:${env.ligoVersion}`;
+      execSync(`${path}  --help`);
+    }
+  }
+  return path;
 };
 
 const getContractsList = () => {
   return fs
     .readdirSync(env.contractsDir)
-    .filter((file) => file.endsWith(".ligo"))
-    .map((file) => file.slice(0, file.length - 5));
+    .filter(file => file.endsWith(".ligo"))
+    .map(file => file.slice(0, file.length - 5));
 };
 
 const getMigrationsList = () => {
   return fs
     .readdirSync(env.migrationsDir)
-    .filter((file) => file.endsWith(".js"))
-    .map((file) => file.slice(0, file.length - 3));
+    .filter(file => file.endsWith(".js"))
+    .map(file => file.slice(0, file.length - 3));
 };
 
-const compile = async (contract) => {
+const compile = async contract => {
   const ligo = getLigo(true);
   const contracts = !contract ? getContractsList() : [contract];
-  contracts.forEach((contract) => {
+  contracts.forEach(contract => {
     const michelson = execSync(
       `${ligo} compile-contract --michelson-format=json $PWD/${env.contractsDir}/${contract}.ligo main`,
-      { maxBuffer: 1024 * 500 }
+      { maxBuffer: 1024 * 500 },
     ).toString();
     try {
       const artifacts = JSON.stringify(
@@ -56,7 +56,7 @@ const compile = async (contract) => {
           compiler: "ligo:" + env.ligoVersion,
         },
         null,
-        2
+        2,
       );
       if (!fs.existsSync(env.buildsDir)) {
         fs.mkdirSync(env.buildsDir);
@@ -71,14 +71,14 @@ const compile = async (contract) => {
 const migrate = async (tezos, contract, storage) => {
   try {
     const artifacts = JSON.parse(
-      fs.readFileSync(`${env.buildsDir}/${contract}.json`)
+      fs.readFileSync(`${env.buildsDir}/${contract}.json`),
     );
     const operation = await tezos.contract
       .originate({
         code: artifacts.michelson,
         storage: storage,
       })
-      .catch((e) => {
+      .catch(e => {
         console.error(JSON.stringify(e));
         return { contractAddress: null };
       });
@@ -88,7 +88,7 @@ const migrate = async (tezos, contract, storage) => {
     }
     fs.writeFileSync(
       `${env.buildsDir}/${contract}.json`,
-      JSON.stringify(artifacts, null, 2)
+      JSON.stringify(artifacts, null, 2),
     );
     await operation.confirmation();
     return operation.contractAddress;
@@ -96,10 +96,10 @@ const migrate = async (tezos, contract, storage) => {
     console.error(e);
   }
 };
-const getDeploydAddress = (contract) => {
+const getDeploydAddress = contract => {
   try {
     const artifacts = JSON.parse(
-      fs.readFileSync(`${env.buildsDir}/${contract}.json`)
+      fs.readFileSync(`${env.buildsDir}/${contract}.json`),
     );
     return artifacts.networks[env.network][contract];
   } catch (e) {
@@ -107,9 +107,9 @@ const getDeploydAddress = (contract) => {
   }
 };
 
-const runMigrations = async (options) => {
-    try {
-    console.log(options)
+const runMigrations = async options => {
+  try {
+    console.log(options);
     const migrations = getMigrationsList();
     options.network = options.network || "development";
     options.optionFrom = options.from || 0;

@@ -175,15 +175,24 @@ function claim(
           proposal          = i;
         ];
 
-        const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
-        var balances : staker_map_type := s.locked_balances.balances;
+        const locked_balance : nat = get_locked_balance(
+          staker_key, s.locked_balances);
 
-        claim_amount := claim_amount + locked_balance;
-        s.locked_balances.balances := rem_balance(staker_key, s.locked_balances.balances);
-        user_props := Set.remove(i, user_props);
-        s.locked_balances.proposals[Tezos.sender] := user_props;
+        if locked_balance = 0n then skip
+        else {
+          var balances : staker_map_type := s.locked_balances.balances;
+          claim_amount := claim_amount + locked_balance;
+          s.locked_balances.balances := rem_balance(
+            staker_key, s.locked_balances.balances
+          );
+          user_props := Set.remove(i, user_props);
+          s.locked_balances.proposals[Tezos.sender] := user_props;
+        }
+
       };
     };
+    if claim_amount > 0n then skip
+    else failwith("Gov/no-claim");
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, Tezos.sender, claim_amount),
       0mutez,

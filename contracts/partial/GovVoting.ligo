@@ -4,23 +4,29 @@ const max_deferral        : seconds_type = 30 * 86_400;
 
 function get_total_supply(
   const new_prop        : new_proposal_type;
-  var s                     : storage_type)
+  var s                 : storage_type)
                         : return is
   block {
     s.temp_proposal_cache[Tezos.sender] := new_prop;
-  } with (list[
-    Tezos.transaction(
+    const sc : contract(get_supply_type) = get_supply_entrypoint(s.qnot_address);
+    const op : operation = Tezos.transaction(
       get_callback(Tezos.self_address),
       0mutez,
-      get_supply_entrypoint(s.qnot_address))
-  ], s)
+      sc
+    );
+  } with ((list[op] : list (operation)), s)
 
 (* Create new proposal *)
-function receive_reserves(
-    const total_supply  : nat;
+function receive_supply(
+    const lresponse     : list(receive_supply_type);
     var s               : storage_type)
                         : return is
   block {
+    const response : receive_supply_type =
+    case List.head_opt(lresponse) of
+      Some (v) -> v
+    | None -> failwith("GOV/invalid-response")
+    end;
     if Tezos.sender = s.qnot_address then skip
     else failwith("GOV/unknown-sender");
     const new_prop: new_proposal_type = get_prop_cache(Tezos.source, s);
@@ -58,14 +64,14 @@ function receive_reserves(
       end_date                = end_date;
       status                  = default_status;
       config                  = s.proposal_config;
-      fixed_supply            = total_supply;
+      fixed_supply            = response.total_supply;
     ];
 
     s.id_count := s.id_count + 1n;
 
     (* Stake part *)
     const stake_amount : nat =
-      total_supply * s.proposal_config.proposal_stake / 100n;
+      response.total_supply * s.proposal_config.proposal_stake / 100n;
 
     const staker_key : staker_key_type = record [
       account           = Tezos.source;
@@ -149,7 +155,7 @@ function add_vote(
     ];
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.sender, Tezos.self_address, votes),
+      get_tx_param(Tezos.source, Tezos.self_address, votes),
       0mutez,
       get_tranfer_contract(s.qnot_address)
     );

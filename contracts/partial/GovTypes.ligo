@@ -104,11 +104,13 @@ type transfer_param_type is [@layout:comb] record [
     txs                   : list(transfer_destination_type);
   ]
 
-type transfer_type       is list(transfer_param_type)
+type transfer_type      is list(transfer_param_type)
 
-type receive_reserves_type is nat
+type receive_supply_type is record[
+  total_supply          :nat
+  ]
 
-type get_supply_type is (contract(receive_reserves_type))
+type get_supply_type    is contract(list(receive_supply_type))
 
 [@inline] const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

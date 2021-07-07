@@ -12,7 +12,7 @@ function get_total_supply(
     Tezos.transaction(
       get_callback(Tezos.self_address),
       0mutez,
-      get_supply_entrypoint(qnot_address))
+      get_supply_entrypoint(s.qnot_address))
   ], s)
 
 (* Create new proposal *)
@@ -21,7 +21,7 @@ function receive_reserves(
     var s               : storage_type)
                         : return is
   block {
-    if Tezos.sender = qnot_address then skip
+    if Tezos.sender = s.qnot_address then skip
     else failwith("GOV/unknown-sender");
     const new_prop: new_proposal_type = get_prop_cache(Tezos.source, s);
     const updated_prop_cache : prop_cache_type =
@@ -81,7 +81,7 @@ function receive_reserves(
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.source, Tezos.self_address, stake_amount),
       0mutez,
-      get_tranfer_contract(unit)
+      get_tranfer_contract(s.qnot_address)
     );
   } with ((list[op] : list (operation)), s)
 
@@ -151,7 +151,7 @@ function add_vote(
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.sender, Tezos.self_address, votes),
       0mutez,
-      get_tranfer_contract(unit)
+      get_tranfer_contract(s.qnot_address)
     );
 
   } with ((list[op] : list (operation)), s)
@@ -187,7 +187,7 @@ function claim(
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, Tezos.sender, claim_amount),
       0mutez,
-      get_tranfer_contract(unit)
+      get_tranfer_contract(s.qnot_address)
     );
 
   } with ((list[op] : list (operation)), s)

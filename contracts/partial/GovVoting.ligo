@@ -213,14 +213,14 @@ function finalize_voting(
     var proposal : proposal_type := get_proposal(prop_id, s);
 
     if proposal.status = Voting then skip
-    else failwith("Gov/proposal-ended");
+    else failwith("Gov/not-voting-period");
 
     if Tezos.now > proposal.end_date then skip
-    else failwith("Gov/voting-period");
+    else failwith("Gov/voting-not-over");
     const votes : nat = proposal.votes_for + proposal.votes_against;
     if ( votes >= proposal.config.voting_quorum * proposal.fixed_supply / 100n)
     then {
-      if (votes >= proposal.config.support_quorum * votes / 100n)
+      if (proposal.votes_for >= proposal.config.support_quorum * votes / 100n)
       then proposal.status := Approved;
       else proposal.status := Rejected;
     } else proposal.status := Underrated;

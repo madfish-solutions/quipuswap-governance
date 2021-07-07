@@ -122,6 +122,6 @@ function ban_proposal(
     const op : operation = transaction(
       get_tx_param(proposal.creator, zero_address, locked_balance),
       0mutez,
-      get_tranfer_contract(unit)
+      get_tranfer_contract(s.qnot_address)
     );
   } with ((list[op] : list (operation)), s)

@@ -54,7 +54,7 @@ function rem_balance (
   } with s
 
 
-function get_tranfer_contract(const _unit : unit) : contract(transfer_type) is
+function get_tranfer_contract(const qnot_address : address) : contract(transfer_type) is
   case (Tezos.get_entrypoint_opt("%transfer", qnot_address) : option(contract(transfer_type))) of
     Some(contr) -> contr
     | None -> (failwith("Gov/not-token") : contract(transfer_type))

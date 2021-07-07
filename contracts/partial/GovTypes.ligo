@@ -89,6 +89,7 @@ type storage_type       is [@layout:comb] record [
   proposal_config         : proposal_config_type;
   pending_owner           : option (address);
   temp_proposal_cache     : prop_cache_type;
+  qnot_address            : address;
 ]
 
 type return is list (operation) * storage_type
@@ -111,5 +112,3 @@ type get_supply_type is (contract(receive_reserves_type))
 
 [@inline] const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);
-[@inlune] const qnot_address : address =
-("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

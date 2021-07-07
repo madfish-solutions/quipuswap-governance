@@ -21,6 +21,7 @@
     "@taquito/signer": "^9.1.1",
     "@taquito/taquito": "^9.1.1",
     "dotenv": "^10.0.0",
+    "fs-extra": "^10.0.0",
     "yargs": "^17.0.1"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
   "scripts": {
     "clean": "rm -rf ./builds/",
     "migrate": "node scripts/cli.js migrate",
+    "migratefa2": "node scripts/sandbox/migrations/0_fa2.js",
     "compile": "yarn clean && node scripts/cli.js compile",
     "start-sandbox": "docker run --rm --name dev-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210602 flobox start",
     "stop-sandbox": "docker kill dev-sandbox",

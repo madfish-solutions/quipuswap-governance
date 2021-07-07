@@ -48,6 +48,18 @@ const account_info = MichelsonMap.fromLiteral({
   },
 });
 
+// const { tz_address } = require("../scripts/sandbox/gov_latest.json");
+
+// account_info.set(
+//   { account: tz_address },
+//   {
+//     balances: MichelsonMap.fromLiteral({
+//       0: 1000,
+//     }),
+//     permits: [],
+//   },
+// );
+
 module.exports = {
   account_info: account_info,
   token_info: MichelsonMap.fromLiteral({}),

@@ -165,30 +165,33 @@ function claim(
     var claim_amount : nat := 0n;
     for i in set user_props block {
       const proposal : proposal_type = get_proposal(i, s);
-      const invalid_status = set[Pending; Voting];
+      const invalid_status = set[Pending];
 
-      if Set.mem(proposal.status, invalid_status)
+      if proposal.status = Pending
       then skip
       else {
-        const staker_key : staker_key_type = record [
+        if proposal.end_date > Tezos.now
+        then skip
+        else {
+          const staker_key : staker_key_type = record [
           account           = Tezos.sender;
           proposal          = i;
-        ];
+          ];
 
-        const locked_balance : nat = get_locked_balance(
-          staker_key, s.locked_balances);
+          const locked_balance : nat = get_locked_balance(
+            staker_key, s.locked_balances);
 
-        if locked_balance = 0n then skip
-        else {
-          var balances : staker_map_type := s.locked_balances.balances;
-          claim_amount := claim_amount + locked_balance;
-          s.locked_balances.balances := rem_balance(
-            staker_key, s.locked_balances.balances
-          );
-          user_props := Set.remove(i, user_props);
-          s.locked_balances.proposals[Tezos.sender] := user_props;
-        }
-
+          if locked_balance = 0n then skip
+          else {
+            var balances : staker_map_type := s.locked_balances.balances;
+            claim_amount := claim_amount + locked_balance;
+            s.locked_balances.balances := rem_balance(
+             staker_key, s.locked_balances.balances
+            );
+            user_props := Set.remove(i, user_props);
+            s.locked_balances.proposals[Tezos.sender] := user_props;
+          };
+        };
       };
     };
     if claim_amount > 0n then skip

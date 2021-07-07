@@ -98,7 +98,7 @@ function total_supply(
                         : list(operation) is
 block {
 const  response : list(supply_of_response) = list[record[
-  total_supply=200n]
+  total_supply=1000n]
 ];
 
 } with list [Tezos.transaction(

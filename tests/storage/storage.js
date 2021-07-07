@@ -1,6 +1,8 @@
 const { MichelsonMap } = require("@taquito/michelson-encoder");
 const { alice, bob, eve } = require("../../scripts/sandbox/accounts");
 
+const { address } = require("../../scripts/sandbox/fa2_latest.json");
+
 const proposalConfig = {
   proposal_stake: "4",
   voting_quorum: "4",
@@ -19,6 +21,7 @@ const defaultStorage = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
+  qnot_address: address,
 };
 
 const withPendingOwnershipBob = {
@@ -33,6 +36,7 @@ const withPendingOwnershipBob = {
   proposal_config: proposalConfig,
   pending_owner: bob.pkh,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
+  qnot_address: address,
 };
 
 const withPendingOwnershipEve = {
@@ -47,6 +51,7 @@ const withPendingOwnershipEve = {
   proposal_config: proposalConfig,
   pending_owner: eve.pkh,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
+  qnot_address: address,
 };
 
 let w = Buffer.from("dsadas", "ascii").toString("hex");
@@ -129,6 +134,7 @@ const withProposals = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
+  qnot_address: address,
 };
 
 const storages = {

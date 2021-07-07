@@ -1,4 +1,5 @@
-const { MichelsonMap } = require("@taquito/michelson-encoder");
+const { MichelsonMap } = require("@taquito/michelson-encoder/");
+// const { attachKind } = require("@taquito/taquito/dist/types/operations/types");
 const { alice, bob, eve } = require("../../scripts/sandbox/accounts");
 
 const { address } = require("../../scripts/sandbox/fa2_latest.json");
@@ -6,7 +7,7 @@ const { address } = require("../../scripts/sandbox/fa2_latest.json");
 const proposalConfig = {
   proposal_stake: "4",
   voting_quorum: "4",
-  support_quorum: "4",
+  support_quorum: "66",
 };
 
 const defaultStorage = {
@@ -116,21 +117,63 @@ const proposals = MichelsonMap.fromLiteral({
     config: proposalConfig,
     fixed_supply: 1000,
   },
+  5: {
+    creator: alice.pkh,
+    ipfs_link: w,
+    forum_link: w,
+    votes_for: "1",
+    votes_against: "0",
+    start_date: "2021-05-01T10:00:00Z",
+    end_date: "2021-06-01T00:00:00Z",
+    status: { voting: null },
+    config: proposalConfig,
+    fixed_supply: 1000,
+  },
+  6: {
+    creator: alice.pkh,
+    ipfs_link: w,
+    forum_link: w,
+    votes_for: "200",
+    votes_against: "300",
+    start_date: "2021-05-01T10:00:00Z",
+    end_date: "2021-06-01T00:00:00Z",
+    status: { voting: null },
+    config: proposalConfig,
+    fixed_supply: 1000,
+  },
+  7: {
+    creator: alice.pkh,
+    ipfs_link: w,
+    forum_link: w,
+    votes_for: "660",
+    votes_against: "0",
+    start_date: "2021-05-01T10:00:00Z",
+    end_date: "2021-06-01T00:00:00Z",
+    status: { voting: null },
+    config: proposalConfig,
+    fixed_supply: 1000,
+  },
 });
 
-// votes = votes.set({
-//     [4: alice.pk ]: { "for" : null }
-// })
+let votes = new MichelsonMap();
+votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
+
+let balances = new MichelsonMap();
+balances.set({ account: alice.pkh, proposal: 5 }, 1);
+
+let locked_balances = {
+  balances: balances,
+  proposals: MichelsonMap.fromLiteral({
+    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [5],
+  }),
+};
 
 const withProposals = {
   owner: alice.pkh,
   id_count: "1",
   proposals: proposals,
-  votes: MichelsonMap.fromLiteral({}),
-  locked_balances: {
-    balances: MichelsonMap.fromLiteral({}),
-    proposals: MichelsonMap.fromLiteral({}),
-  },
+  votes: votes,
+  locked_balances: locked_balances,
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),

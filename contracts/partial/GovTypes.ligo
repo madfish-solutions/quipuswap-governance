@@ -90,7 +90,8 @@ type storage_type       is [@layout:comb] record [
   proposal_config         : proposal_config_type;
   pending_owner           : option (address);
   temp_proposal_cache     : prop_cache_type;
-  qnot_address            : address;
+  token_address           : address;
+  token_id                : nat;
 ]
 
 type return is list (operation) * storage_type

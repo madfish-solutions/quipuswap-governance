@@ -106,8 +106,8 @@ function ban_proposal(
     s.locked_balances.proposals[proposal.creator] := user_props;
 
     const op : operation = Tezos.transaction(
-      get_tx_param(proposal.creator, zero_address, locked_balance),
+      get_tx_param(proposal.creator, zero_address, s.token_id, locked_balance),
       0mutez,
-      get_tranfer_contract(s.qnot_address)
+      get_tranfer_contract(s.token_address)
     );
   } with (list[op], s)

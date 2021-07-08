@@ -113,24 +113,65 @@ function add_vote(
     else skip;
 
     (* Update proposal votes *)
-    var voters : voter_key_type := record [
+    const voter_key : voter_key_type = record [
       proposal          = vote.proposal;
       voter             = Tezos.sender;
     ];
 
-    s.votes := Map.add(voters, vote.vote, s.votes);
+    const old_votes : nat = get_user_votes(voter_key, s);
+
+    // case s.votes[voter_key] of
+    //     For (v) - {
+    //       skip
+    //     }
+    //   | Against (v) -> {
+    //     skip
+    //   }
+    //   | None
 
     var votes : nat := 0n;
     case vote.vote of
-      For (v) -> {
-        proposal.votes_for := proposal.votes_for + v;
-        votes := v;
+      For (nv) -> {
+        votes := nv;
+        case s.votes[voter_key] of
+          Some (vote) ->
+            case vote of
+              For (ov)-> {
+                proposal.votes_for := proposal.votes_for + nv;
+
+              }
+            | Against (ov) -> {
+                proposal.votes_against := abs(proposal.votes_against - ov);
+                proposal.votes_for := proposal.votes_for + ov + nv;
+              }
+            end
+        | None -> {
+            proposal.votes_for := proposal.votes_for + nv;
+          }
+        end;
+        s.votes[voter_key] := For(old_votes + nv);
       }
-    | Against (v) -> {
-        proposal.votes_against := proposal.votes_against + v;
-        votes := v;
+    | Against (nv) -> {
+        votes := nv;
+        case s.votes[voter_key] of
+          Some (vote) ->
+            case vote of
+              For (ov)-> {
+                proposal.votes_for := abs(proposal.votes_for - ov);
+                proposal.votes_against := proposal.votes_against + ov + nv;
+              }
+            | Against (ov) -> {
+                proposal.votes_against := proposal.votes_against + nv;
+              }
+            end
+        | None -> {
+            proposal.votes_against := proposal.votes_against + nv;
+          }
+        end;
+        s.votes[voter_key] := Against(old_votes + nv);
       }
     end;
+    // s.votes[voter_key] := Against(10n);
 
     (* Сhanges the status of the proposal to
     "Voting" if the status was not updated earlier *)

@@ -8,6 +8,19 @@ function get_proposal(
   | Some(proposal) -> proposal
   end
 
+function get_user_votes (
+  const voter_key       : voter_key_type;
+  const s               : storage_type)
+                        : nat is
+  case s.votes[voter_key] of
+
+  | None -> 0n
+  | Some (vote) ->
+      case vote of
+        For (v)-> v
+      | Against (v) -> v
+      end
+  end
 
 function get_locked_balance(
     const staker_key      : staker_key_type;

@@ -98,7 +98,6 @@ function receive_supply(
     );
   } with ((list[op] : list (operation)), s)
 
-
 function add_vote(
   var vote              : new_vote_type;
   var s                 : storage_type)
@@ -174,15 +173,14 @@ function add_vote(
 
   } with ((list[op] : list (operation)), s)
 
-
 function claim(
   var s                 : storage_type)
                         : return is
   block {
     (* Iterates over set prop id and writes unlocked qnot amount for claim *)
-    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
+    // var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
     var claim_amount : nat := 0n;
-    for i in set user_props block {
+    for i in set get_staker_proposals(Tezos.sender, s) block {
       const proposal : proposal_type = get_proposal(i, s);
 
       (* Validate proposal status *)
@@ -209,6 +207,7 @@ function claim(
             s.locked_balances.balances := rem_balance(
              staker_key, s.locked_balances.balances
             );
+            var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
             user_props := Set.remove(i, user_props);
             s.locked_balances.proposals[Tezos.sender] := user_props;
           };
@@ -224,7 +223,6 @@ function claim(
     );
 
   } with ((list[op] : list (operation)), s)
-
 
 function finalize_voting(
   const prop_id         : id_type;
@@ -251,7 +249,6 @@ function finalize_voting(
 
     s.proposals[prop_id] := proposal;
   } with s
-
 
  function activate_proposal(
   const prop_id         : id_type;

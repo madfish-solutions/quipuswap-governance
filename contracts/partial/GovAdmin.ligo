@@ -83,9 +83,6 @@ function ban_proposal(
 
     (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);
-    if Big_map.mem(prop_id, s.proposals)
-    then skip
-    else failwith("Gov/no-proposal-id");
 
     if (proposal.status = Pending or proposal.status = Voting)
     then skip
@@ -113,4 +110,4 @@ function ban_proposal(
       0mutez,
       get_tranfer_contract(s.qnot_address)
     );
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)

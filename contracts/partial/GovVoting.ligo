@@ -14,7 +14,7 @@ function get_total_supply(
       0mutez,
       sc
     );
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)
 
 (* Create new proposal *)
 function receive_supply(
@@ -96,7 +96,7 @@ function receive_supply(
       0mutez,
       get_tranfer_contract(s.qnot_address)
     );
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)
 
 function add_vote(
   var vote              : new_vote_type;
@@ -171,7 +171,7 @@ function add_vote(
       get_tranfer_contract(s.qnot_address)
     );
 
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)
 
 function claim(
   var s                 : storage_type)
@@ -222,7 +222,7 @@ function claim(
       get_tranfer_contract(s.qnot_address)
     );
 
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)
 
 function finalize_voting(
   const prop_id         : id_type;

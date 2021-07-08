@@ -184,7 +184,6 @@ function claim(
     var claim_amount : nat := 0n;
     for i in set user_props block {
       const proposal : proposal_type = get_proposal(i, s);
-      const invalid_status = set[Pending];
 
       (* Validate proposal status *)
       if proposal.status = Pending
@@ -260,7 +259,7 @@ function finalize_voting(
                         : storage_type is
   block {
      (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     (* Validate proposal status *)
     var proposal : proposal_type := get_proposal(prop_id, s);

@@ -111,10 +111,9 @@ function rem_prop_cache (
 
 
 function is_owner (
-  const _unit           : unit;
-  const _s              : storage_type)
+  const s               : storage_type)
                         : unit is
 block{
-  if Tezos.sender = _s.owner then skip
+  if Tezos.sender = s.owner then skip
   else failwith("Gov/not-owner");
-} with _unit
+} with unit

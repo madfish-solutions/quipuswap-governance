@@ -4,7 +4,7 @@ function transfer_ownership(
                         : storage_type is
   block {
     (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     (* Does not allow reassignment of the applicant *)
     if s.pending_owner = (None: option (address))
@@ -34,7 +34,7 @@ function cancel_transfer_ownership(
                         : storage_type is
   block {
      (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     if s.pending_owner =/= (None: option (address))
     then skip
@@ -50,7 +50,7 @@ function set_proposal_setup(
                         : storage_type is
   block {
      (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     case new_setup of
     (* Update a specific parameter *)
@@ -79,7 +79,7 @@ function ban_proposal(
                         : return is
   block {
     (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);

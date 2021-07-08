@@ -112,5 +112,5 @@ type receive_supply_type is record[
 
 type get_supply_type    is contract(list(receive_supply_type))
 
-[@inline] const zero_address : address =
+const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

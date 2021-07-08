@@ -1,4 +1,9 @@
-const { rejects, strictEqual, notStrictEqual } = require("assert");
+const {
+  rejects,
+  strictEqual,
+  notStrictEqual,
+  deepStrictEqual,
+} = require("assert");
 const { Tezos, signerAlice, signerBob, alice } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
 const { bob } = require("../scripts/sandbox/accounts");
@@ -154,6 +159,21 @@ describe("Admin test", async function () {
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.support_quorum.toNumber(), 5);
+    });
+    it("Successfully changed: Full config", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      let op = await contract.methods
+        .set_proposal_setup("config", 5, 5, 5)
+        .send();
+      await op.confirmation();
+      let storage = await contract.storage();
+      let proposal_config = await storage.proposal_config;
+      let params = [
+        proposal_config.proposal_stake.toNumber(),
+        proposal_config.support_quorum.toNumber(),
+        proposal_config.voting_quorum.toNumber(),
+      ];
+      deepStrictEqual(params, [5, 5, 5]);
     });
   });
   describe("Testing entrypoint: ban_proposal", async function () {

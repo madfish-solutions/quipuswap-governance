@@ -19,10 +19,21 @@ yarn start-sandbox
 
 ```
 
+
+This command will deploy a fa2 token contract. It may not start the first time. Wait 5-30 seconds or spam command
+```
+yarn migratefa2
+
+```
+
+
+
+
 ```
 yarn test
 
-```
+``` 
+
 
 ```
 yarn stop-sandbox

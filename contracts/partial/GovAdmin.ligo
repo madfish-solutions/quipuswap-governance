@@ -52,30 +52,10 @@ function set_proposal_setup(
      (* Check account permission *)
     is_owner(unit, s);
 
-    case new_setup.proposal of
-      Id (v) -> {
-        (* Validate  requested proposal *)
-        if not(Big_map.mem(v, s.proposals))
-        then failwith("Gov/bad-proposal")
-        else {
-          (* Update proposal config *)
-          var _proposal : proposal_type := get_proposal(v, s);
-          case new_setup.settings of
-            Proposal_stake (val) -> _proposal := _proposal with record [
-              config.proposal_stake = val
-            ]
-          | Voting_quorum (val) -> _proposal := _proposal with record [
-              config.voting_quorum = val
-            ]
-          | Support_quorum (val) -> _proposal := _proposal with record [
-              config.support_quorum = val
-          ]
-          end;
-        }
-      }
-    | Null -> {
-        (* Update global proposals config *)
-        case new_setup.settings of
+    case new_setup of
+    (* Update a specific parameter *)
+      Setting (param) -> {
+        case param of
           Proposal_stake (v) -> s := s with record [
             proposal_config.proposal_stake = v
           ]
@@ -86,7 +66,9 @@ function set_proposal_setup(
             proposal_config.support_quorum = v
           ]
         end;
-    }
+      }
+    (* Update full config *)
+    | Config (new_config) -> s.proposal_config := new_config
   end
   } with s
 

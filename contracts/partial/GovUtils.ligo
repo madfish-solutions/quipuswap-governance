@@ -32,12 +32,13 @@ function get_staker_proposals (
 function get_tx_param(
     const from_         : address;
     const to_           : address;
+    const token_id      : nat;
     const value         : nat)
                         : list(transfer_param_type) is
   block {
     const transfer_destination : transfer_destination_type = record [
       to_               = to_;
-      token_id          = 0n;
+      token_id          = token_id;
       amount            = value;
     ];
     const transfer_param : transfer_param_type = record [

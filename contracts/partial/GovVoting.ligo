@@ -8,7 +8,7 @@ function get_total_supply(
                         : return is
   block {
     s.temp_proposal_cache[Tezos.sender] := new_prop;
-    const sc : contract(get_supply_type) = get_supply_entrypoint(s.qnot_address);
+    const sc : contract(get_supply_type) = get_supply_entrypoint(s.token_address);
     const op : operation = Tezos.transaction(
       get_callback(Tezos.self_address),
       0mutez,
@@ -30,7 +30,7 @@ function receive_supply(
     end;
 
     (* Validate sender response*)
-    if Tezos.sender = s.qnot_address then skip
+    if Tezos.sender = s.token_address then skip
     else failwith("GOV/unknown-sender");
 
     (* Clears temp cache *)
@@ -82,9 +82,9 @@ function receive_supply(
     (* Stake qnots *)
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.source, Tezos.self_address, collateral_amount),
+      get_tx_param(Tezos.source, Tezos.self_address, s.token_id, collateral_amount),
       0mutez,
-      get_tranfer_contract(s.qnot_address)
+      get_tranfer_contract(s.token_address)
     );
   } with (list[op], s)
 
@@ -156,9 +156,9 @@ function add_vote(
     ];
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.source, Tezos.self_address, votes),
+      get_tx_param(Tezos.source, Tezos.self_address, s.token_id, votes),
       0mutez,
-      get_tranfer_contract(s.qnot_address)
+      get_tranfer_contract(s.token_address)
     );
 
   } with (list[op], s)
@@ -212,9 +212,9 @@ function claim(
     if claim_amount > 0n then skip
     else failwith("Gov/no-claim");
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.self_address, Tezos.sender, claim_amount),
+      get_tx_param(Tezos.self_address, Tezos.sender,  s.token_id, claim_amount),
       0mutez,
-      get_tranfer_contract(s.qnot_address)
+      get_tranfer_contract(s.token_address)
     );
 
   } with (list[op], s)

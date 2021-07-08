@@ -52,7 +52,7 @@ type proposal_type      is [@layout:comb] record [
   end_date                : timestamp;
   status                  : status_type;
   config                  : proposal_config_type;
-  fixed_supply            : nat;
+  collateral              : nat;
 ]
 
 

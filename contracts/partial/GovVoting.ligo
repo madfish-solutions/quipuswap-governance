@@ -59,6 +59,10 @@ function receive_supply(
         default_status := Pending;
       };
     };
+
+    const collateral_amount : nat =
+      response.total_supply * s.proposal_config.proposal_stake / 100n;
+
     (* Create new proposal *)
     s.proposals[s.id_count] := record [
       creator                 = Tezos.source;
@@ -70,29 +74,15 @@ function receive_supply(
       end_date                = end_date;
       status                  = default_status;
       config                  = s.proposal_config;
-      fixed_supply            = response.total_supply;
+      collateral              = collateral_amount;
     ];
 
     s.id_count := s.id_count + 1n;
 
-    (* Stake part *)
-    const stake_amount : nat =
-      response.total_supply * s.proposal_config.proposal_stake / 100n;
-
-    const staker_key : staker_key_type = record [
-      account           = Tezos.source;
-      proposal          = abs(s.id_count - 1n);
-    ];
-
-    (* Save the staked amount of the user*)
-    var balances : staker_map_type := s.locked_balances.balances;
-    balances[staker_key] := stake_amount;
-    s.locked_balances := s.locked_balances with record[
-      balances = balances;
-    ];
+    (* Stake qnots *)
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.source, Tezos.self_address, stake_amount),
+      get_tx_param(Tezos.source, Tezos.self_address, collateral_amount),
       0mutez,
       get_tranfer_contract(s.qnot_address)
     );
@@ -211,6 +201,11 @@ function claim(
             user_props := Set.remove(i, user_props);
             s.locked_balances.proposals[Tezos.sender] := user_props;
           };
+
+          if Tezos.sender = proposal.creator and not(proposal.status = Banned)
+          then {
+            claim_amount := claim_amount + proposal.collateral
+          } else skip;
         };
       };
     };
@@ -240,7 +235,8 @@ function finalize_voting(
     const votes : nat = proposal.votes_for + proposal.votes_against;
 
     (* Сalculation of voting results *)
-    if ( votes >= proposal.config.voting_quorum * proposal.fixed_supply / 100n)
+    const last_supply : nat = proposal.collateral * 100n / proposal.config.proposal_stake;
+    if ( votes >= proposal.config.voting_quorum * last_supply / 100n)
     then {
       if (proposal.votes_for >= proposal.config.support_quorum * votes / 100n)
       then proposal.status := Approved;

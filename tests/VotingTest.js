@@ -134,8 +134,15 @@ describe("Voting test", async function () {
     });
   });
   describe("Testing entrypoint: Activate_proposal", async function () {
-    it("Fail if proposal status not approved", async function () {
+    it("Only the owner can call this method", async function () {
       Tezos.setSignerProvider(signerBob);
+      await rejects(contract.methods.activate_proposal(1).send(), err => {
+        strictEqual(err.message, "Gov/not-owner");
+        return true;
+      });
+    });
+    it("Fail if proposal status not approved", async function () {
+      Tezos.setSignerProvider(signerAlice);
       await rejects(contract.methods.activate_proposal(1).send(), err => {
         strictEqual(err.message, "Gov/not-approved");
         return true;

@@ -1,3 +1,4 @@
+(* Helper to get proposal *)
 function get_proposal(
     const prop_id       : id_type;
     const s             : storage_type)
@@ -17,6 +18,7 @@ function get_locked_balance(
   | Some(v) -> v
   end
 
+
 function get_staker_proposals (
   const addr            : address;
   const s               : storage_type)
@@ -26,6 +28,7 @@ function get_staker_proposals (
   | Some(v) -> v
   end
 
+(* Create tranfer tx param *)
 function get_tx_param(
     const from_         : address;
     const to_           : address;
@@ -44,7 +47,7 @@ function get_tx_param(
   } with list[transfer_param]
 
 
-
+(* Remove staked user qnots *)
 function rem_balance (
   const key             : staker_key_type;
   var s                 : staker_map_type)
@@ -64,7 +67,7 @@ function get_tranfer_contract(
 
 
 
-(* helper to get the entrypoint of current contract *)
+(* Helper to get the entrypoint of current contract *)
 function get_callback(
   const token_address   : address)
                         : contract(list(receive_supply_type)) is
@@ -75,7 +78,7 @@ function get_callback(
   | None -> (failwith("Gov/not-callback") : contract(list(receive_supply_type)))
   end;
 
-(* helper to get the entrypoint of Qnot contract *)
+(* Helper to get the entrypoint of Qnot contract *)
 function get_supply_entrypoint(
   const token_address   : address)
                         : contract(get_supply_type) is
@@ -86,17 +89,8 @@ function get_supply_entrypoint(
     | None -> (failwith("Gov/not-qnot") : contract(get_supply_type))
   end;
 
-// (* helper to get the entrypoint of Qnot contract *)
-// function get_supply_entrypoint(
-//   const token_address   : address)
-//                         : contract(get_supply_type) is
-//   case (Tezos.get_entrypoint_opt(
-//     "%total_supply",
-//     token_address) : option(contract(get_supply_type))) of
-//     Some(contr) -> contr
-//   | None -> (failwith("Gov/not-qnot") : contract(get_supply_type))
-//   end;
 
+(* Helper to get proposal cache *)
 function get_prop_cache(
     const creator       : address;
     const s             : storage_type)
@@ -106,6 +100,7 @@ function get_prop_cache(
   | Some(v) -> v
   end
 
+(* Remove proposal cache *)
 function rem_prop_cache (
   const creator         : address;
   var prop_cache        : prop_cache_type)
@@ -114,3 +109,12 @@ function rem_prop_cache (
     remove creator from map prop_cache
   } with prop_cache
 
+
+function is_owner (
+  const _unit           : unit;
+  const _s              : storage_type)
+                        : unit is
+block{
+  if Tezos.sender = _s.owner then skip
+  else failwith("Gov/not-owner");
+} with _unit

@@ -60,6 +60,10 @@ function receive_supply(
       };
     };
 
+    (* Add proposal for future claim *)
+    var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
+    s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count + 1n, staker_proposals);
+
     const collateral_amount : nat =
       response.total_supply * s.proposal_config.proposal_stake / 100n;
 
@@ -120,15 +124,6 @@ function add_vote(
 
     const old_votes : nat = get_user_votes(voter_key, s);
 
-    // case s.votes[voter_key] of
-    //     For (v) - {
-    //       skip
-    //     }
-    //   | Against (v) -> {
-    //     skip
-    //   }
-    //   | None
-
     var votes : nat := 0n;
     case vote.vote of
       For (nv) -> {
@@ -171,8 +166,6 @@ function add_vote(
         s.votes[voter_key] := Against(old_votes + nv);
       }
     end;
-    // s.votes[voter_key] := Against(10n);
-
     (* Сhanges the status of the proposal to
     "Voting" if the status was not updated earlier *)
     if proposal.status = Pending
@@ -180,6 +173,13 @@ function add_vote(
     else skip;
 
     s.proposals[vote.proposal] := proposal;
+
+     (* Add proposal for future claim *)
+    var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
+    if Set.mem(vote.proposal, staker_proposals) then skip
+    else {
+      s.locked_balances.proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
+    };
 
     (* Stake part *)
     const staker_key : staker_key_type = record [

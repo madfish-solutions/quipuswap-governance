@@ -22,18 +22,24 @@ function receive_supply(
     var s               : storage_type)
                         : return is
   block {
+    (* Validate response *)
     const response : receive_supply_type =
     case List.head_opt(lresponse) of
       Some (v) -> v
     | None -> failwith("GOV/invalid-response")
     end;
+
+    (* Validate sender response*)
     if Tezos.sender = s.qnot_address then skip
     else failwith("GOV/unknown-sender");
+
+    (* Clears temp cache *)
     const new_prop: new_proposal_type = get_prop_cache(Tezos.source, s);
     const updated_prop_cache : prop_cache_type =
       rem_prop_cache(Tezos.source, s.temp_proposal_cache);
     s.temp_proposal_cache := updated_prop_cache;
 
+    (* Validate proposal setup *)
     if new_prop.voting_period >= min_proposal_period
     then skip
     else failwith("Gov/small-voting-perod");
@@ -53,7 +59,7 @@ function receive_supply(
         default_status := Pending;
       };
     };
-
+    (* Create new proposal *)
     s.proposals[s.id_count] := record [
       creator                 = Tezos.source;
       ipfs_link               = new_prop.ipfs_link;
@@ -78,6 +84,7 @@ function receive_supply(
       proposal          = abs(s.id_count - 1n);
     ];
 
+    (* Save the staked amount of the user*)
     var balances : staker_map_type := s.locked_balances.balances;
     balances[staker_key] := stake_amount;
     s.locked_balances := s.locked_balances with record[
@@ -97,6 +104,7 @@ function add_vote(
   var s                 : storage_type)
                         : return is
   block {
+    (* Validate requsted proposal *)
     if Big_map.mem(vote.proposal, s.proposals)
     then skip
     else failwith("Gov/bad-proposal");
@@ -115,6 +123,7 @@ function add_vote(
     then failwith("Gov/proposal-banned")
     else skip;
 
+    (* Update proposal votes *)
     var voters : voter_key_type := record [
       proposal          = vote.proposal;
       voter             = Tezos.sender;
@@ -134,6 +143,8 @@ function add_vote(
       }
     end;
 
+    (* Сhanges the status of the proposal to
+    "Voting" if the status was not updated earlier *)
     if proposal.status = Pending
     then proposal.status := Voting
     else skip;
@@ -146,6 +157,7 @@ function add_vote(
       proposal          = vote.proposal;
     ];
 
+    (* Save the staked amount of the user*)
     const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
     var balances : staker_map_type := s.locked_balances.balances;
 
@@ -167,18 +179,21 @@ function claim(
   var s                 : storage_type)
                         : return is
   block {
+    (* Iterates over set prop id and writes unlocked qnot amount for claim *)
     var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
     var claim_amount : nat := 0n;
     for i in set user_props block {
       const proposal : proposal_type = get_proposal(i, s);
       const invalid_status = set[Pending];
 
+      (* Validate proposal status *)
       if proposal.status = Pending
       then skip
       else {
         if proposal.end_date > Tezos.now
         then skip
         else {
+          (* Receiving blocked account QNOTs *)
           const staker_key : staker_key_type = record [
           account           = Tezos.sender;
           proposal          = i;
@@ -187,6 +202,7 @@ function claim(
           const locked_balance : nat = get_locked_balance(
             staker_key, s.locked_balances);
 
+          (* Вeletes records of blocked QNOTs*)
           if locked_balance = 0n then skip
           else {
             var balances : staker_map_type := s.locked_balances.balances;
@@ -216,6 +232,7 @@ function finalize_voting(
   var s                 : storage_type)
                         : storage_type is
   block {
+    (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);
 
     if proposal.status = Voting then skip
@@ -224,6 +241,8 @@ function finalize_voting(
     if Tezos.now > proposal.end_date then skip
     else failwith("Gov/voting-not-over");
     const votes : nat = proposal.votes_for + proposal.votes_against;
+
+    (* Сalculation of voting results *)
     if ( votes >= proposal.config.voting_quorum * proposal.fixed_supply / 100n)
     then {
       if (proposal.votes_for >= proposal.config.support_quorum * votes / 100n)
@@ -240,11 +259,15 @@ function finalize_voting(
   var s                 : storage_type)
                         : storage_type is
   block {
-    var proposal : proposal_type := get_proposal(prop_id, s);
+     (* Check account permission *)
+    is_owner(unit, s);
 
+    (* Validate proposal status *)
+    var proposal : proposal_type := get_proposal(prop_id, s);
     if proposal.status = Approved then skip
     else failwith("Gov/not-approved");
 
+    (* Activated proposal *)
     proposal.status := Activated;
     s.proposals[prop_id] := proposal;
   } with s

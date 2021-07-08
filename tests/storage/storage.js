@@ -160,11 +160,12 @@ votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
 
 let balances = new MichelsonMap();
 balances.set({ account: alice.pkh, proposal: 5 }, 1);
+balances.set({ account: alice.pkh, proposal: 4 }, 11);
 
 let locked_balances = {
   balances: balances,
   proposals: MichelsonMap.fromLiteral({
-    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [5],
+    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [5, 4],
   }),
 };
 

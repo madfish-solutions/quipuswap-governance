@@ -22,7 +22,8 @@ const defaultStorage = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  token_address: address,
+  token_id: 0,
 };
 
 const withPendingOwnershipBob = {
@@ -37,7 +38,8 @@ const withPendingOwnershipBob = {
   proposal_config: proposalConfig,
   pending_owner: bob.pkh,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  token_address: address,
+  token_id: 0,
 };
 
 const withPendingOwnershipEve = {
@@ -52,7 +54,8 @@ const withPendingOwnershipEve = {
   proposal_config: proposalConfig,
   pending_owner: eve.pkh,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  token_address: address,
+  token_id: 0,
 };
 
 let w = Buffer.from("dsadas", "ascii").toString("hex");
@@ -67,7 +70,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2031-01-01T00:00:00Z",
     status: { pending: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   1: {
     creator: alice.pkh,
@@ -79,7 +82,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2030-01-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   2: {
     creator: alice.pkh,
@@ -91,7 +94,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2090-01-01T00:00:00Z",
     status: { banned: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   3: {
     creator: alice.pkh,
@@ -103,7 +106,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-01-01T00:00:00Z",
     status: { approved: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   4: {
     creator: alice.pkh,
@@ -115,7 +118,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2030-01-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   5: {
     creator: alice.pkh,
@@ -127,7 +130,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   6: {
     creator: alice.pkh,
@@ -139,7 +142,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   7: {
     creator: alice.pkh,
@@ -151,7 +154,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
 });
 
@@ -178,7 +181,8 @@ const withProposals = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  token_address: address,
+  token_id: 0,
 };
 
 const storages = {

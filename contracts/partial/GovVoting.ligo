@@ -7,6 +7,7 @@ function get_total_supply(
   var s                 : storage_type)
                         : return is
   block {
+    s.expected_sender := Some(Tezos.sender);
     s.temp_proposal_cache[Tezos.sender] := new_prop;
     const sc : contract(get_supply_type) = get_supply_entrypoint(s.token_address);
     const op : operation = Tezos.transaction(
@@ -33,10 +34,14 @@ function receive_supply(
     if Tezos.sender = s.token_address then skip
     else failwith("GOV/unknown-sender");
 
+    const expected_sender : address = get_expected_sender(s);
+    if Tezos.source = expected_sender then skip
+    else failwith("GOV/not-expected-sender");
+
     (* Clears temp cache *)
-    const new_prop: new_proposal_type = get_prop_cache(Tezos.source, s);
+    const new_prop: new_proposal_type = get_prop_cache(expected_sender, s);
     const updated_prop_cache : prop_cache_type =
-      rem_prop_cache(Tezos.source, s.temp_proposal_cache);
+      rem_prop_cache(expected_sender, s.temp_proposal_cache);
     s.temp_proposal_cache := updated_prop_cache;
 
     (* Validate proposal setup *)
@@ -62,7 +67,7 @@ function receive_supply(
 
     (* Create new proposal *)
     s.proposals[s.id_count] := record [
-      creator                 = Tezos.source;
+      creator                 = expected_sender;
       ipfs_link               = new_prop.ipfs_link;
       forum_link              = new_prop.forum_link;
       votes_for               = 0n;
@@ -79,7 +84,7 @@ function receive_supply(
     (* Stake qnots *)
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.source, Tezos.self_address, s.token_id, collateral_amount),
+      get_tx_param(expected_sender, Tezos.self_address, s.token_id, collateral_amount),
       0mutez,
       get_tranfer_contract(s.token_address)
     );

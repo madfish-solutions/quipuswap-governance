@@ -10,7 +10,7 @@ type parameter_type is
   | Set_proposal_setup        of proposal_setup_type
   | Ban_proposal              of id_type
   | New_proposal              of new_proposal_type
-  | Receive_supply            of list(receive_supply_type)
+  | Receive_supply            of receive_supply_type
   | Vote                      of new_vote_type
   | Claim                     of unit
   | Finalize_voting           of id_type

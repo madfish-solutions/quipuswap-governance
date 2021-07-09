@@ -24,6 +24,7 @@ const defaultStorage = {
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
   token_address: address,
   token_id: 0,
+  expected_sender: null,
 };
 
 const withPendingOwnershipBob = {
@@ -40,6 +41,7 @@ const withPendingOwnershipBob = {
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
   token_address: address,
   token_id: 0,
+  expected_sender: null,
 };
 
 const withPendingOwnershipEve = {
@@ -56,6 +58,7 @@ const withPendingOwnershipEve = {
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
   token_address: address,
   token_id: 0,
+  expected_sender: null,
 };
 
 let w = Buffer.from("dsadas", "ascii").toString("hex");
@@ -183,6 +186,7 @@ const withProposals = {
   temp_proposal_cache: MichelsonMap.fromLiteral({}),
   token_address: address,
   token_id: 0,
+  expected_sender: null,
 };
 
 const storages = {

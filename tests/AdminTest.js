@@ -14,6 +14,7 @@ describe("Admin test", async function () {
   var s = [
     "withProposals",
     "withProposals",
+    "withProposals",
     "defaultStorage",
     "defaultStorage",
     "defaultStorage",
@@ -29,12 +30,12 @@ describe("Admin test", async function () {
     "withPendingOwnershipBob",
     "defaultStorage",
   ];
-
+  let deployedContract;
   beforeEach(async () => {
     let q = s.pop();
     try {
       const { storages } = require("./storage/storage");
-      let deployedContract = await migrate(Tezos, "Governance", storages[q]);
+      deployedContract = await migrate(Tezos, "Governance", storages[q]);
       contract = await Tezos.contract.at(deployedContract);
     } catch (e) {
       console.log(e);
@@ -42,7 +43,7 @@ describe("Admin test", async function () {
   });
 
   describe("Testing entrypoint: Transfer_ownership", async function () {
-    it("Only the owner can call this method", async function () {
+    it("Revert tranfering ownership if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         contract.methods.transfer_ownership(bob.pkh).send(),
@@ -52,7 +53,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it("Сannot transfer ownership if someone is already in the transfer pending", async function () {
+    it("Revert tranfering ownership if someone is already in the transfer pending", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         contract.methods.transfer_ownership(bob.pkh).send(),
@@ -62,7 +63,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it("Successful transfer of ownership", async function () {
+    it("Should allow transfer of ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods.transfer_ownership(bob.pkh).send();
       await op.confirmation();
@@ -71,14 +72,14 @@ describe("Admin test", async function () {
     });
   });
   describe("Testing entrypoint: Take_ownership", async function () {
-    it("Cannot take ownership, if does not in pending to transfer of ownership", async function () {
+    it("Revert take ownership, if does not in pending to transfer of ownership", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.take_ownership(["unit"]).send(), err => {
         strictEqual(err.message, "Gov/not-pending-owner");
         return true;
       });
     });
-    it("Bob successfully became the new owner", async function () {
+    it("Should allow take ownership the new owner", async function () {
       Tezos.setSignerProvider(signerBob);
       let op = await contract.methods.take_ownership(["unit"]).send();
       await op.confirmation();
@@ -87,7 +88,7 @@ describe("Admin test", async function () {
     });
   });
   describe("Testing entrypoint: СancelTransferOwnership", async function () {
-    it("Only the owner can call this method", async function () {
+    it("Revert canceling transfer ownership if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         contract.methods.cancel_transfer_ownership(["unit"]).send(),
@@ -97,7 +98,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it('failwith("Gov/no-pending-admin")', async function () {
+    it("Revert canceling transfer ownership if no pending new owner", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         contract.methods.cancel_transfer_ownership(["unit"]).send(),
@@ -107,7 +108,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it("Successfully cancel transfer ownership", async function () {
+    it("Should allow cancel transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
         .cancel_transfer_ownership(["unit"])
@@ -118,7 +119,7 @@ describe("Admin test", async function () {
     });
   });
   describe("Testing entrypoint: set_proposal_setup", async function () {
-    it("Only the owner can call this method", async function () {
+    it("Revert changing proposal setup if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         contract.methods
@@ -130,7 +131,7 @@ describe("Admin test", async function () {
         },
       );
     });
-    it("Successfully changed: Proposal_stake", async function () {
+    it("Should allow changing: Proposal_stake", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
         .set_proposal_setup("proposal_stake", 5, "null", "unit")
@@ -140,7 +141,7 @@ describe("Admin test", async function () {
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.proposal_stake.toNumber(), 5);
     });
-    it("Successfully changed: Voting_quorum", async function () {
+    it("Should allow changing: Voting_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
         .set_proposal_setup("voting_quorum", 5, "null", "unit")
@@ -150,7 +151,7 @@ describe("Admin test", async function () {
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.voting_quorum.toNumber(), 5);
     });
-    it("Successfully changed: Support_quorum", async function () {
+    it("Should allow changing: Support_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
         .set_proposal_setup("support_quorum", 5, "null", "unit")
@@ -160,7 +161,7 @@ describe("Admin test", async function () {
       let proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.support_quorum.toNumber(), 5);
     });
-    it("Successfully changed: Full config", async function () {
+    it("Should allow changing: Full config", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
         .set_proposal_setup("config", 5, 5, 5)
@@ -177,30 +178,29 @@ describe("Admin test", async function () {
     });
   });
   describe("Testing entrypoint: ban_proposal", async function () {
-    it("Only the owner can call this method", async function () {
+    it("Revert blocking proposal if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.ban_proposal(0).send(), err => {
         strictEqual(err.message, "Gov/not-owner");
         return true;
       });
     });
-    it("Invalid proposal id", async function () {
+    it("Revert blocking non-existent proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(contract.methods.ban_proposal(1).send(), err => {
+      await rejects(contract.methods.ban_proposal(10).send(), err => {
         strictEqual(err.message, "Gov/not-prop-id");
         return true;
       });
     });
-    it("Bad proposal status", async function () {
+    it("Revert blocking ended proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(contract.methods.ban_proposal(3).send(), err => {
         strictEqual(err.message, "Gov/bad-proposal-status");
         return true;
       });
     });
-    it("Successfully ban proposal", async function () {
+    it("Should allow ban proposal with from burning proposal stake", async function () {
       Tezos.setSignerProvider(signerAlice);
-      const { getDeploydAddress } = require("../scripts/helpers");
       const { address } = require("../scripts/sandbox/fa2_latest.json");
       fa2_contract = await Tezos.contract.at(address);
       const update_op = await fa2_contract.methods
@@ -208,7 +208,7 @@ describe("Admin test", async function () {
           {
             add_operator: {
               owner: alice.pkh,
-              operator: getDeploydAddress("Governance"),
+              operator: deployedContract,
               token_id: 0,
             },
           },

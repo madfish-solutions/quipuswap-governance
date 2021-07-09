@@ -62,7 +62,7 @@ const account_info = MichelsonMap.fromLiteral({
 
 module.exports = {
   account_info: account_info,
-  token_info: MichelsonMap.fromLiteral({}),
+  token_info: MichelsonMap.fromLiteral({ 0: [2000] }),
   metadata: metadata,
   token_metadata: tokenMetadata,
   minters: [],

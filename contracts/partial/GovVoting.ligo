@@ -23,11 +23,8 @@ function receive_supply(
                         : return is
   block {
     // (* Validate response *)
-    // const response : receive_supply_type =
-    // case List.head_opt(lresponse) of
-    //   Some (v) -> v
-    // | None -> failwith("GOV/invalid-response")
-    // end;
+    if total_supply > 0n then skip
+    else failwith("GOV/bad-supply-response");
 
     (* Validate sender response*)
     if Tezos.sender = s.token_address then skip

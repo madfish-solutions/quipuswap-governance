@@ -269,9 +269,9 @@ function finalize_voting(
 
     (* Сalculation of voting results *)
     const last_supply : nat = proposal.collateral * 100n / proposal.config.proposal_stake;
-    if ( votes >= proposal.config.voting_quorum * last_supply / 100n)
+    if votes >= proposal.config.voting_quorum * last_supply / 100n
     then {
-      if (proposal.votes_for >= proposal.config.support_quorum * votes / 100n)
+      if proposal.votes_for >= proposal.config.support_quorum * votes / 100n
       then proposal.status := Approved;
       else proposal.status := Rejected;
     } else proposal.status := Underrated;

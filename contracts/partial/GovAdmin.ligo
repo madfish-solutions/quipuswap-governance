@@ -84,7 +84,7 @@ function ban_proposal(
     (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);
 
-    if (proposal.status = Pending or proposal.status = Voting)
+    if proposal.status = Pending or proposal.status = Voting
     then skip
     else failwith("Gov/bad-proposal-status");
 

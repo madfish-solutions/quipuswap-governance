@@ -92,6 +92,7 @@ type storage_type       is [@layout:comb] record [
   temp_proposal_cache     : prop_cache_type;
   token_address           : address;
   token_id                : nat;
+  expected_sender         : option(address);
 ]
 
 type return is list (operation) * storage_type

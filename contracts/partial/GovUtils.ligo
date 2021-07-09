@@ -131,3 +131,11 @@ block{
   if Tezos.sender = s.owner then skip
   else failwith("Gov/not-owner");
 } with unit
+
+function get_expected_sender(
+  const s               : storage_type)
+                        : address is
+  case s.expected_sender of
+    Some (v) -> v
+  | None -> failwith("GOV/not-sender")
+  end

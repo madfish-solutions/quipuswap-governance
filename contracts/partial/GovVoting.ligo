@@ -46,19 +46,12 @@ function receive_supply(
     if new_prop.voting_period <= max_proposal_period
     then skip
     else failwith("Gov/long-voting-perod");
-    var start_date : timestamp := Tezos.now;
-    var end_date: timestamp := Tezos.now + new_prop.voting_period;
-    var default_status := Voting;
-
-    if new_prop.deferral = 0 then skip
-    else {
-      if new_prop.deferral > max_deferral then failwith("Gov/long-deferral")
-      else {
-        start_date := Tezos.now + new_prop.deferral;
-        end_date := end_date + new_prop.deferral;
-        default_status := Pending;
-      };
-    };
+    if new_prop.deferral > max_deferral
+    then failwith("Gov/long-deferral")
+    else skip;
+    var start_date : timestamp := Tezos.now + new_prop.deferral;
+    var end_date: timestamp := Tezos.now + new_prop.voting_period + new_prop.deferral;
+    var default_status := if new_prop.deferral = 0 then Pending else Voting;
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
@@ -131,9 +124,8 @@ function add_vote(
         case s.votes[voter_key] of
           Some (vote) ->
             case vote of
-              For (ov)-> {
+              For (_)-> {
                 proposal.votes_for := proposal.votes_for + nv;
-
               }
             | Against (ov) -> {
                 proposal.votes_against := abs(proposal.votes_against - ov);
@@ -155,7 +147,7 @@ function add_vote(
                 proposal.votes_for := abs(proposal.votes_for - ov);
                 proposal.votes_against := proposal.votes_against + ov + nv;
               }
-            | Against (ov) -> {
+            | Against (_) -> {
                 proposal.votes_against := proposal.votes_against + nv;
               }
             end

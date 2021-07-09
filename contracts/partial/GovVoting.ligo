@@ -59,7 +59,7 @@ function receive_supply(
     s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count + 1n, staker_proposals);
 
     const collateral_amount : nat =
-      total_supply * s.proposal_config.proposal_stake / 100n;
+      total_supply * s.proposal_config.proposal_stake / s.accuracy;
 
     (* Create new proposal *)
     s.proposals[s.id_count] := record [
@@ -268,10 +268,10 @@ function finalize_voting(
     const votes : nat = proposal.votes_for + proposal.votes_against;
 
     (* Сalculation of voting results *)
-    const last_supply : nat = proposal.collateral * 100n / proposal.config.proposal_stake;
-    if votes >= proposal.config.voting_quorum * last_supply / 100n
+    const last_supply : nat = proposal.collateral * s.accuracy / proposal.config.proposal_stake;
+    if votes >= proposal.config.voting_quorum * last_supply / s.accuracy
     then {
-      if proposal.votes_for >= proposal.config.support_quorum * votes / 100n
+      if proposal.votes_for >= proposal.config.support_quorum * votes / s.accuracy
       then proposal.status := Approved;
       else proposal.status := Rejected;
     } else proposal.status := Underrated;

@@ -5,9 +5,9 @@ const { alice, bob, eve } = require("../../scripts/sandbox/accounts");
 const { address } = require("../../scripts/sandbox/fa2_latest.json");
 
 const proposalConfig = {
-  proposal_stake: "4",
-  voting_quorum: "4",
-  support_quorum: "66",
+  proposal_stake: "5000",
+  voting_quorum: "40000",
+  support_quorum: "660000",
 };
 
 const defaultStorage = {
@@ -25,6 +25,7 @@ const defaultStorage = {
   token_address: address,
   token_id: 0,
   expected_sender: null,
+  accuracy: 1000000,
 };
 
 const withPendingOwnershipBob = {
@@ -42,6 +43,7 @@ const withPendingOwnershipBob = {
   token_address: address,
   token_id: 0,
   expected_sender: null,
+  accuracy: 1000000,
 };
 
 const withPendingOwnershipEve = {
@@ -59,6 +61,7 @@ const withPendingOwnershipEve = {
   token_address: address,
   token_id: 0,
   expected_sender: null,
+  accuracy: 1000000,
 };
 
 let w = Buffer.from("dsadas", "ascii").toString("hex");
@@ -187,6 +190,7 @@ const withProposals = {
   token_address: address,
   token_id: 0,
   expected_sender: null,
+  accuracy: 1000000,
 };
 
 const storages = {

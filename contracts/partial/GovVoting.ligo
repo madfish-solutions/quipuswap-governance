@@ -9,26 +9,25 @@ function get_total_supply(
   block {
     s.expected_sender := Some(Tezos.sender);
     s.temp_proposal_cache[Tezos.sender] := new_prop;
-    const sc : contract(get_supply_type) = get_supply_entrypoint(s.token_address);
     const op : operation = Tezos.transaction(
-      get_callback(Tezos.self_address),
+      (0n, get_callback(Tezos.self_address)),
       0mutez,
-      sc
+      get_supply_entrypoint(s.token_address)
     );
   } with (list[op], s)
 
 (* Create new proposal *)
 function receive_supply(
-    const lresponse     : list(receive_supply_type);
+    const total_supply  : receive_supply_type;
     var s               : storage_type)
                         : return is
   block {
-    (* Validate response *)
-    const response : receive_supply_type =
-    case List.head_opt(lresponse) of
-      Some (v) -> v
-    | None -> failwith("GOV/invalid-response")
-    end;
+    // (* Validate response *)
+    // const response : receive_supply_type =
+    // case List.head_opt(lresponse) of
+    //   Some (v) -> v
+    // | None -> failwith("GOV/invalid-response")
+    // end;
 
     (* Validate sender response*)
     if Tezos.sender = s.token_address then skip
@@ -63,7 +62,7 @@ function receive_supply(
     s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count + 1n, staker_proposals);
 
     const collateral_amount : nat =
-      response.total_supply * s.proposal_config.proposal_stake / 100n;
+      total_supply * s.proposal_config.proposal_stake / 100n;
 
     (* Create new proposal *)
     s.proposals[s.id_count] := record [
@@ -230,7 +229,6 @@ function claim(
           (* Вeletes records of blocked QNOTs*)
           if locked_balance = 0n then skip
           else {
-            var balances : staker_map_type := s.locked_balances.balances;
             claim_amount := claim_amount + locked_balance;
             s.locked_balances.balances := rem_balance(
              staker_key, s.locked_balances.balances

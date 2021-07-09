@@ -139,3 +139,25 @@ function get_expected_sender(
     Some (v) -> v
   | None -> failwith("GOV/not-sender")
   end
+
+function check_set_value (
+  const value           : nat;
+  const s               : storage_type)
+                        : unit is
+block {
+  if value <= 100n * s.accuracy then skip
+  else failwith("GOV/invalid-param-value")
+} with unit
+
+function check_config (
+  const config          : proposal_config_type;
+  const s               : storage_type)
+                        : unit is
+block {
+  const max_value : nat = 100n * s.accuracy;
+  if config.proposal_stake <= max_value
+  and config.voting_quorum  <= max_value
+  and config.support_quorum <= max_value
+  then skip
+  else failwith("GOV/invalid-param-value");
+} with unit

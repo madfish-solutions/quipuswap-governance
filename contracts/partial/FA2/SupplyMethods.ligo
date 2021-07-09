@@ -90,19 +90,3 @@ function create_token(
     s.tokens_ids := Set.add(s.last_token_id, s.tokens_ids);
     s.last_token_id := s.last_token_id + 1n;
   } with s
-
-
-function total_supply(
-  const supply_params  : supply_params_type;
-  const s               : quipu_storage)
-                        : list(operation) is
-block {
-const  response : list(supply_of_response) = list[record[
-  total_supply=1000n]
-];
-
-} with list [Tezos.transaction(
-    response,
-    0tz,
-    supply_params.callback
-  )]

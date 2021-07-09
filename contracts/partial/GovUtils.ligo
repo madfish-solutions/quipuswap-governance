@@ -84,12 +84,12 @@ function get_tranfer_contract(
 (* Helper to get the entrypoint of current contract *)
 function get_callback(
   const token_address   : address)
-                        : contract(list(receive_supply_type)) is
+                        : contract(receive_supply_type) is
   case (Tezos.get_entrypoint_opt(
     "%receive_supply",
-    token_address)      : option(contract(list(receive_supply_type)))) of
+    token_address)      : option(contract(receive_supply_type))) of
     Some(contr) -> contr
-  | None -> (failwith("Gov/not-callback") : contract(list(receive_supply_type)))
+  | None -> (failwith("Gov/not-callback") : contract(receive_supply_type))
   end;
 
 (* Helper to get the entrypoint of Qnot contract *)
@@ -97,7 +97,7 @@ function get_supply_entrypoint(
   const token_address   : address)
                         : contract(get_supply_type) is
   case (Tezos.get_entrypoint_opt(
-    "%total_supply",
+    "%get_total_supply",
     token_address) : option(contract(get_supply_type))) of
     Some(contr) -> contr
     | None -> (failwith("Gov/not-qnot") : contract(get_supply_type))

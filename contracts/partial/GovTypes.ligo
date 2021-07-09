@@ -109,11 +109,9 @@ type transfer_param_type is [@layout:comb] record [
 
 type transfer_type      is list(transfer_param_type)
 
-type receive_supply_type is record[
-  total_supply          :nat
-  ]
+type receive_supply_type is nat
 
-type get_supply_type    is contract(list(receive_supply_type))
+type get_supply_type    is (nat * contract(nat))
 
 const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

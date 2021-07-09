@@ -2,9 +2,9 @@ const { MichelsonMap } = require("@taquito/michelson-encoder");
 const { alice } = require("../scripts/sandbox/accounts");
 
 const proposalConfig = {
-  proposal_stake: 4,
-  voting_quorum: 4,
-  support_quorum: 4,
+  proposal_stake: "5000",
+  voting_quorum: "40000",
+  support_quorum: "660000",
 };
 
 module.exports = {

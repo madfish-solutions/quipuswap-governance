@@ -21,6 +21,7 @@ describe("Admin test", async function () {
     "defaultStorage",
     "defaultStorage",
     "defaultStorage",
+    "defaultStorage",
     "withPendingOwnershipBob",
     "defaultStorage",
     "defaultStorage",
@@ -30,6 +31,7 @@ describe("Admin test", async function () {
     "withPendingOwnershipBob",
     "defaultStorage",
   ];
+
   let deployedContract;
   beforeEach(async () => {
     let q = s.pop();
@@ -131,40 +133,52 @@ describe("Admin test", async function () {
         },
       );
     });
+    it("Revert changing proposal setup if  parameter is more than 100%", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(
+        contract.methods
+          .set_proposal_setup("proposal_stake", 50000000000000, "null", "unit")
+          .send(),
+        err => {
+          strictEqual(err.message, "GOV/invalid-param-value");
+          return true;
+        },
+      );
+    });
     it("Should allow changing: Proposal_stake", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
-        .set_proposal_setup("proposal_stake", 5, "null", "unit")
+        .set_proposal_setup("proposal_stake", 5000, "null", "unit")
         .send();
       await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
-      strictEqual(proposal_config.proposal_stake.toNumber(), 5);
+      strictEqual(proposal_config.proposal_stake.toNumber(), 5000);
     });
     it("Should allow changing: Voting_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
-        .set_proposal_setup("voting_quorum", 5, "null", "unit")
+        .set_proposal_setup("voting_quorum", 40000, "null", "unit")
         .send();
       await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
-      strictEqual(proposal_config.voting_quorum.toNumber(), 5);
+      strictEqual(proposal_config.voting_quorum.toNumber(), 40000);
     });
     it("Should allow changing: Support_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
-        .set_proposal_setup("support_quorum", 5, "null", "unit")
+        .set_proposal_setup("support_quorum", 660000, "null", "unit")
         .send();
       await op.confirmation();
       let storage = await contract.storage();
       let proposal_config = await storage.proposal_config;
-      strictEqual(proposal_config.support_quorum.toNumber(), 5);
+      strictEqual(proposal_config.support_quorum.toNumber(), 660000);
     });
     it("Should allow changing: Full config", async function () {
       Tezos.setSignerProvider(signerAlice);
       let op = await contract.methods
-        .set_proposal_setup("config", 5, 5, 5)
+        .set_proposal_setup("config", 40000, 40000, 40000)
         .send();
       await op.confirmation();
       let storage = await contract.storage();
@@ -174,7 +188,7 @@ describe("Admin test", async function () {
         proposal_config.support_quorum.toNumber(),
         proposal_config.voting_quorum.toNumber(),
       ];
-      deepStrictEqual(params, [5, 5, 5]);
+      deepStrictEqual(params, [40000, 40000, 40000]);
     });
   });
   describe("Testing entrypoint: ban_proposal", async function () {

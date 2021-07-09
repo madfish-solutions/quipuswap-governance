@@ -56,19 +56,31 @@ function set_proposal_setup(
     (* Update a specific parameter *)
       Setting (param) -> {
         case param of
-          Proposal_stake (v) -> s := s with record [
-            proposal_config.proposal_stake = v
-          ]
-        | Voting_quorum (v) -> s := s with record [
-            proposal_config.voting_quorum = v
-          ]
-        | Support_quorum (v) -> s := s with record [
+          Proposal_stake (v) -> {
+            check_set_value(v, s);
+            s := s with record [
+              proposal_config.proposal_stake = v
+            ]
+          }
+        | Voting_quorum (v) -> {
+            check_set_value(v, s);
+            s := s with record [
+              proposal_config.voting_quorum = v
+            ]
+          }
+        | Support_quorum (v) -> {
+          check_set_value(v, s);
+          s := s with record [
             proposal_config.support_quorum = v
           ]
+        }
         end;
       }
     (* Update full config *)
-    | Config (new_config) -> s.proposal_config := new_config
+    | Config (new_config) -> {
+      check_config(new_config, s);
+      s.proposal_config := new_config
+    }
   end
   } with s
 

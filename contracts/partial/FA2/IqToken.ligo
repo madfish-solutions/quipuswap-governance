@@ -47,6 +47,9 @@ type mint_params        is list(mint_param)
 type return             is list(operation) * quipu_storage
 type new_token_params   is map(string, bytes)
 
+type get_total_supply_params is
+  michelson_pair(token_id, "token_id", contract(nat), "")
+
 type quipu_action       is
     Create_token          of new_token_params
   | Mint                  of mint_params
@@ -58,7 +61,7 @@ type quipu_action       is
   | Balance_of            of balance_params
   | Permit                of permit_param
   | Set_expiry            of set_expiry_param
-  | Total_supply          of supply_params_type
+  | Get_total_supply      of get_total_supply_params
 
 [@inline] const no_operations : list(operation) = nil;
 [@inline] const accuracy : nat = 1000000n;

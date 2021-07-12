@@ -9,12 +9,12 @@ function dayToSec(day) {
 describe("Proposal test", async function () {
   Tezos.setSignerProvider(signerAlice);
   let contract;
-  let link = Buffer.from("ipfsLink", "ascii").toString("hex");
+  const link = Buffer.from("ipfsLink", "ascii").toString("hex");
 
   before(async () => {
     try {
       const { storages } = require("./storage/storage");
-      let deployedContract = await migrate(
+      const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["defaultStorage"],
@@ -70,19 +70,19 @@ describe("Proposal test", async function () {
       );
     });
     it("Should create proposal with enough stake", async function () {
-      let op = await contract.methods
+      const op = await contract.methods
         .new_proposal(link, link, dayToSec(4), 0)
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(1, storage.id_count.toNumber());
     });
     it("Should create deferral proposal with enough stake", async function () {
-      let op = await contract.methods
+      const op = await contract.methods
         .new_proposal(link, link, dayToSec(4), dayToSec(15))
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(2, storage.id_count.toNumber());
     });
   });

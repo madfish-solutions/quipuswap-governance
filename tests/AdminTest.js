@@ -11,7 +11,7 @@ const { bob } = require("../scripts/sandbox/accounts");
 describe("Admin test", async function () {
   let contract;
 
-  var s = [
+  let s = [
     "withProposals",
     "withProposals",
     "withProposals",
@@ -34,7 +34,7 @@ describe("Admin test", async function () {
 
   let deployedContract;
   beforeEach(async () => {
-    let q = s.pop();
+    const q = s.pop();
     try {
       const { storages } = require("./storage/storage");
       deployedContract = await migrate(Tezos, "Governance", storages[q]);
@@ -67,9 +67,9 @@ describe("Admin test", async function () {
     });
     it("Should allow transfer of ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.transfer_ownership(bob.pkh).send();
+      const op = await contract.methods.transfer_ownership(bob.pkh).send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(bob.pkh, storage.pending_owner);
     });
   });
@@ -83,9 +83,9 @@ describe("Admin test", async function () {
     });
     it("Should allow take ownership the new owner", async function () {
       Tezos.setSignerProvider(signerBob);
-      let op = await contract.methods.take_ownership(["unit"]).send();
+      const op = await contract.methods.take_ownership(["unit"]).send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(storage.owner, bob.pkh);
     });
   });
@@ -112,11 +112,11 @@ describe("Admin test", async function () {
     });
     it("Should allow cancel transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods
+      const op = await contract.methods
         .cancel_transfer_ownership(["unit"])
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(storage.pending_owner, null);
     });
   });
@@ -147,43 +147,43 @@ describe("Admin test", async function () {
     });
     it("Should allow changing: Proposal_stake", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods
+      const op = await contract.methods
         .set_proposal_setup("proposal_stake", 5000, "null", "unit")
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal_config = await storage.proposal_config;
+      const storage = await contract.storage();
+      const proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.proposal_stake.toNumber(), 5000);
     });
     it("Should allow changing: Voting_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods
+      const op = await contract.methods
         .set_proposal_setup("voting_quorum", 40000, "null", "unit")
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal_config = await storage.proposal_config;
+      const storage = await contract.storage();
+      const proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.voting_quorum.toNumber(), 40000);
     });
     it("Should allow changing: Support_quorum", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods
+      const op = await contract.methods
         .set_proposal_setup("support_quorum", 660000, "null", "unit")
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal_config = await storage.proposal_config;
+      const storage = await contract.storage();
+      const proposal_config = await storage.proposal_config;
       strictEqual(proposal_config.support_quorum.toNumber(), 660000);
     });
     it("Should allow changing: Full config", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods
+      const op = await contract.methods
         .set_proposal_setup("config", 40000, 40000, 40000)
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal_config = await storage.proposal_config;
-      let params = [
+      const storage = await contract.storage();
+      const proposal_config = await storage.proposal_config;
+      const params = [
         proposal_config.proposal_stake.toNumber(),
         proposal_config.support_quorum.toNumber(),
         proposal_config.voting_quorum.toNumber(),
@@ -230,10 +230,10 @@ describe("Admin test", async function () {
         .send();
       await update_op.confirmation();
 
-      let op = await contract.methods.ban_proposal(0).send();
+      const op = await contract.methods.ban_proposal(0).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(0);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(0);
       notStrictEqual(undefined, proposal.status["banned"]);
     });
   });

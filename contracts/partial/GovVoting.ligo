@@ -56,7 +56,7 @@ function receive_supply(
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
-    s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count + 1n, staker_proposals);
+    s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count, staker_proposals);
 
     const collateral_amount : nat =
       total_supply * s.proposal_config.proposal_stake / s.accuracy;

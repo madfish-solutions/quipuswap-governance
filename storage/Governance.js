@@ -18,7 +18,9 @@ module.exports = {
   },
   proposal_config: proposalConfig,
   pending_owner: null,
-  temp_proposal_cache: MichelsonMap.fromLiteral({}),
+  temp_proposal_cache: null,
   token_address: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
   token_id: 0,
+  expected_sender: null,
+  accuracy: 1000000,
 };

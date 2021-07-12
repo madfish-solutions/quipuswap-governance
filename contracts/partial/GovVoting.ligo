@@ -24,11 +24,11 @@ function receive_supply(
   block {
     // (* Validate response *)
     if total_supply > 0n then skip
-    else failwith("GOV/bad-supply-response");
+    else failwith("Gov/bad-supply-response");
 
     (* Validate sender response*)
     if Tezos.sender = s.token_address then skip
-    else failwith("GOV/unknown-sender");
+    else failwith("Gov/unknown-sender");
 
     const expected_sender : address = get_expected_sender(s);
     s.expected_sender := (None: option(address));

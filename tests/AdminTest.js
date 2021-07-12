@@ -140,7 +140,7 @@ describe("Admin test", async function () {
           .set_proposal_setup("proposal_stake", 50000000000000, "null", "unit")
           .send(),
         err => {
-          strictEqual(err.message, "GOV/invalid-param-value");
+          strictEqual(err.message, "Gov/invalid-param-value");
           return true;
         },
       );

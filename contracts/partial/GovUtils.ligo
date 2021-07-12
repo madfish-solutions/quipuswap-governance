@@ -127,7 +127,7 @@ function get_expected_sender(
                         : address is
   case s.expected_sender of
     Some (v) -> v
-  | None -> failwith("GOV/not-sender")
+  | None -> failwith("Gov/not-sender")
   end
 
 function check_set_value (
@@ -136,7 +136,7 @@ function check_set_value (
                         : unit is
 block {
   if value <= 100n * s.accuracy then skip
-  else failwith("GOV/invalid-param-value")
+  else failwith("Gov/invalid-param-value")
 } with unit
 
 function check_config (
@@ -149,5 +149,5 @@ block {
   and config.voting_quorum  <= max_value
   and config.support_quorum <= max_value
   then skip
-  else failwith("GOV/invalid-param-value");
+  else failwith("Gov/invalid-param-value");
 } with unit

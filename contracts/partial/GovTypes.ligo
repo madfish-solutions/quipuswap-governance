@@ -12,12 +12,6 @@ type new_vote_type      is [@layout:comb] record [
   vote                    : vote_type;
 ]
 
-type proposal_config_type is [@layout:comb] record [
-  proposal_stake            : nat;
-  voting_quorum             : nat;
-  support_quorum            : nat;
-]
-
 type settings_type      is
     Proposal_stake      of nat
   | Voting_quorum       of nat

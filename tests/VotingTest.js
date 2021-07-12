@@ -14,7 +14,7 @@ describe("Voting test", async function () {
       Tezos.setSignerProvider(signerAlice);
       const { storages } = require("./storage/storage");
 
-      let deployedContract = await migrate(
+      const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["withProposals"],
@@ -64,24 +64,24 @@ describe("Voting test", async function () {
       });
     });
     it("Should allow voting for the same", async function () {
-      let op = await contract.methods.vote("4", "for", 50).send();
+      const op = await contract.methods.vote("4", "for", 50).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(4);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 50);
     });
     it("Should allow voting twice for the same proposal", async function () {
-      let op = await contract.methods.vote("4", "for", 1).send();
+      const op = await contract.methods.vote("4", "for", 1).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(4);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 51);
     });
     it("Should allow changing the vote from for to against", async function () {
-      let op = await contract.methods.vote("4", "against", 1).send();
+      const op = await contract.methods.vote("4", "against", 1).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(4);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 0);
       strictEqual(proposal.votes_against.toNumber(), 52);
     });
@@ -100,9 +100,9 @@ describe("Voting test", async function () {
       let acc = await fa2.account_info.get(alice.pkh);
       const old_balance = await acc.balances.get("0").toNumber();
 
-      let op = await contract.methods.claim("unit").send();
+      const op = await contract.methods.claim("unit").send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       const locked_balance = await storage.locked_balances.balances.get({
         proposal: 5,
         account: alice.pkh,
@@ -133,26 +133,26 @@ describe("Voting test", async function () {
     });
     it("Should allow to count the voting results with the result: Underrated", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(5).send();
+      const op = await contract.methods.finalize_voting(5).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(5);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(5);
       notStrictEqual(proposal.status["underrated"], undefined);
     });
     it("Should allow to count the voting results with the result: Rejected", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(6).send();
+      const op = await contract.methods.finalize_voting(6).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(6);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(6);
       notStrictEqual(proposal.status["rejected"], undefined);
     });
     it("Should allow to count the voting results with the result: Approved", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(7).send();
+      const op = await contract.methods.finalize_voting(7).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(7);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(7);
       notStrictEqual(proposal.status["approved"], undefined);
     });
   });
@@ -173,10 +173,10 @@ describe("Voting test", async function () {
     });
     it("Should allow to activate proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.activate_proposal(7).send();
+      const op = await contract.methods.activate_proposal(7).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(7);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(7);
       notStrictEqual(proposal.status["activated"], undefined);
     });
   });

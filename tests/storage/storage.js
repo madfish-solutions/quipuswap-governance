@@ -64,7 +64,7 @@ const withPendingOwnershipEve = {
   accuracy: 1000000,
 };
 
-let w = Buffer.from("dsadas", "ascii").toString("hex");
+const w = Buffer.from("dsadas", "ascii").toString("hex");
 const proposals = MichelsonMap.fromLiteral({
   0: {
     creator: alice.pkh,
@@ -164,15 +164,15 @@ const proposals = MichelsonMap.fromLiteral({
   },
 });
 
-let votes = new MichelsonMap();
+const votes = new MichelsonMap();
 votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
 
-let balances = new MichelsonMap();
+const balances = new MichelsonMap();
 balances.set({ account: alice.pkh, proposal: 4 }, 1111); //does not participate in the claim
 balances.set({ account: alice.pkh, proposal: 5 }, 1);
 balances.set({ account: alice.pkh, proposal: 6 }, 1);
 
-let locked_balances = {
+const locked_balances = {
   balances: balances,
   proposals: MichelsonMap.fromLiteral({
     tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [4, 5, 6],

@@ -73,7 +73,6 @@ type locked_balances_type is [@layout:comb] record [
   balances                : staker_map_type;
   proposals               : staker_proposals_type ;
 ]
-type prop_cache_type is big_map(address, new_proposal_type)
 
 type storage_type       is [@layout:comb] record [
   owner                   : address;
@@ -83,7 +82,7 @@ type storage_type       is [@layout:comb] record [
   locked_balances         : locked_balances_type;
   proposal_config         : proposal_config_type;
   pending_owner           : option (address);
-  temp_proposal_cache     : prop_cache_type;
+  temp_proposal_cache     : option(new_proposal_type);
   token_address           : address;
   token_id                : nat;
   accuracy                : nat;

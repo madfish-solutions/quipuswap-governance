@@ -136,7 +136,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    collateral: 10,
+    collateral: 20,
   },
   6: {
     creator: alice.pkh,
@@ -148,7 +148,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    collateral: 10,
+    collateral: 20,
   },
   7: {
     creator: alice.pkh,
@@ -168,13 +168,14 @@ let votes = new MichelsonMap();
 votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
 
 let balances = new MichelsonMap();
+balances.set({ account: alice.pkh, proposal: 4 }, 1111); //does not participate in the claim
 balances.set({ account: alice.pkh, proposal: 5 }, 1);
-balances.set({ account: alice.pkh, proposal: 4 }, 11);
+balances.set({ account: alice.pkh, proposal: 6 }, 1);
 
 let locked_balances = {
   balances: balances,
   proposals: MichelsonMap.fromLiteral({
-    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [5, 4],
+    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [4, 5, 6],
   }),
 };
 

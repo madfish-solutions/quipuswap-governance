@@ -8,6 +8,7 @@ const { alice } = require("../scripts/sandbox/accounts");
 
 describe("Voting test", async function () {
   let contract;
+  let fa2_contract;
   before(async () => {
     try {
       Tezos.setSignerProvider(signerAlice);
@@ -93,8 +94,12 @@ describe("Voting test", async function () {
         return true;
       });
     });
-    it("Should allow to claim collateral after voting is finished", async function () {
+    it("Should allow to claim collateral after voting is finished from all available proposals", async function () {
       Tezos.setSignerProvider(signerAlice);
+      let fa2 = await fa2_contract.storage();
+      let acc = await fa2.account_info.get(alice.pkh);
+      const old_balance = await acc.balances.get("0").toNumber();
+
       let op = await contract.methods.claim("unit").send();
       await op.confirmation();
       let storage = await contract.storage();
@@ -102,6 +107,12 @@ describe("Voting test", async function () {
         proposal: 5,
         account: alice.pkh,
       });
+
+      fa2 = await fa2_contract.storage();
+      acc = await fa2.account_info.get(alice.pkh);
+      const new_balance = await acc.balances.get("0").toNumber();
+
+      strictEqual(new_balance, old_balance + 42);
       strictEqual(locked_balance, undefined);
     });
   });

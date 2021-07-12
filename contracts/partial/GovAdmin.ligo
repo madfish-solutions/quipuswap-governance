@@ -105,20 +105,8 @@ function ban_proposal(
     s.proposals[prop_id] := proposal;
 
     (* Burning staked user qnots from proposal *)
-    const staker_key : staker_key_type = record [
-      account           = proposal.creator;
-      proposal          = prop_id;
-    ];
-
-    const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
-
-    s.locked_balances.balances := rem_balance(staker_key, s.locked_balances.balances);
-    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
-    user_props := Set.remove(prop_id, user_props);
-    s.locked_balances.proposals[proposal.creator] := user_props;
-
     const op : operation = Tezos.transaction(
-      get_tx_param(proposal.creator, zero_address, s.token_id, locked_balance),
+      get_tx_param(proposal.creator, zero_address, s.token_id, proposal.collateral),
       0mutez,
       get_tranfer_contract(s.token_address)
     );

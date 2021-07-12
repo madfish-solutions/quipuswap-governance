@@ -31,8 +31,7 @@ function receive_supply(
     else failwith("GOV/unknown-sender");
 
     const expected_sender : address = get_expected_sender(s);
-    if Tezos.source = expected_sender then skip
-    else failwith("GOV/not-expected-sender");
+    s.expected_sender := (None: option(address));
 
     const new_prop: new_proposal_type = get_prop_cache(s);
 
@@ -54,8 +53,8 @@ function receive_supply(
     var default_status := if new_prop.deferral = 0 then Pending else Voting;
 
     (* Add proposal for future claim *)
-    var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
-    s.locked_balances.proposals[Tezos.source] := Set.add(s.id_count, staker_proposals);
+    var staker_proposals : set(nat) := get_staker_proposals(expected_sender, s);
+    s.locked_balances.proposals[expected_sender] := Set.add(s.id_count, staker_proposals);
 
     const collateral_amount : nat =
       total_supply * s.proposal_config.proposal_stake / s.accuracy;
@@ -167,7 +166,7 @@ function add_vote(
     s.proposals[vote.proposal] := proposal;
 
      (* Add proposal for future claim *)
-    var staker_proposals : set(nat) := get_staker_proposals(Tezos.source, s);
+    var staker_proposals : set(nat) := get_staker_proposals(Tezos.sender, s);
     if Set.mem(vote.proposal, staker_proposals) then skip
     else {
       s.locked_balances.proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
@@ -189,7 +188,7 @@ function add_vote(
     ];
 
     const op : operation = Tezos.transaction(
-      get_tx_param(Tezos.source, Tezos.self_address, s.token_id, votes),
+      get_tx_param(Tezos.sender, Tezos.self_address, s.token_id, votes),
       0mutez,
       get_tranfer_contract(s.token_address)
     );

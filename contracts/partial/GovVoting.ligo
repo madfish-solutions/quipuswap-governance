@@ -8,7 +8,7 @@ function get_total_supply(
                         : return is
   block {
     s.expected_sender := Some(Tezos.sender);
-    s.temp_proposal_cache[Tezos.sender] := new_prop;
+    s.temp_proposal_cache := Some(new_prop);
     const op : operation = Tezos.transaction(
       (0n, get_callback(Tezos.self_address)),
       0mutez,
@@ -34,11 +34,10 @@ function receive_supply(
     if Tezos.source = expected_sender then skip
     else failwith("GOV/not-expected-sender");
 
+    const new_prop: new_proposal_type = get_prop_cache(s);
+
     (* Clears temp cache *)
-    const new_prop: new_proposal_type = get_prop_cache(expected_sender, s);
-    const updated_prop_cache : prop_cache_type =
-      rem_prop_cache(expected_sender, s.temp_proposal_cache);
-    s.temp_proposal_cache := updated_prop_cache;
+    s.temp_proposal_cache := (None: option(new_proposal_type));
 
     (* Validate proposal setup *)
     if new_prop.voting_period >= min_proposal_period

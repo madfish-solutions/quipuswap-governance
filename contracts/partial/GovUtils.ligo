@@ -106,22 +106,12 @@ function get_supply_entrypoint(
 
 (* Helper to get proposal cache *)
 function get_prop_cache(
-    const creator       : address;
     const s             : storage_type)
                         : new_proposal_type is
-  case s.temp_proposal_cache[creator] of
+  case s.temp_proposal_cache of
     None -> failwith("Gov/not-creator")
   | Some(v) -> v
   end
-
-(* Remove proposal cache *)
-function rem_prop_cache (
-  const creator         : address;
-  var prop_cache        : prop_cache_type)
-                        : prop_cache_type is
-  block {
-    remove creator from map prop_cache
-  } with prop_cache
 
 
 function is_owner (

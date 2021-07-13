@@ -209,9 +209,9 @@ function claim(
       if proposal.status = Pending
       then skip
       else {
-        if proposal.end_date > Tezos.now
-        then skip
-        else {
+        if Tezos.now > proposal.end_date or
+        (proposal.end_date >= Tezos.now and proposal.status = Banned)
+        then {
           (* Receiving blocked account QNOTs *)
           const staker_key : staker_key_type = record [
           account           = Tezos.sender;
@@ -237,7 +237,7 @@ function claim(
           then {
             claim_amount := claim_amount + proposal.collateral
           } else skip;
-        };
+        } else skip;
       };
     };
     if claim_amount > 0n then skip

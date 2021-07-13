@@ -19,5 +19,5 @@ function main(
   | Balance_of(params)        -> (get_balance_of(params, s), s)
   | Permit(params)            -> add_permit(params, s)
   | Set_expiry(params)        -> set_expiry(params, s, action)
-  | Total_supply(params)      -> (total_supply(params, s), s)
+  | Get_total_supply(params)  -> get_total_supply(params.0, params.1, s)
   end

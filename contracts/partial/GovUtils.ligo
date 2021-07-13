@@ -8,6 +8,19 @@ function get_proposal(
   | Some(proposal) -> proposal
   end
 
+function get_user_votes (
+  const voter_key       : voter_key_type;
+  const s               : storage_type)
+                        : nat is
+  case s.votes[voter_key] of
+
+  | None -> 0n
+  | Some (vote) ->
+      case vote of
+        For (v)-> v
+      | Against (v) -> v
+      end
+  end
 
 function get_locked_balance(
     const staker_key      : staker_key_type;
@@ -32,12 +45,13 @@ function get_staker_proposals (
 function get_tx_param(
     const from_         : address;
     const to_           : address;
+    const token_id      : nat;
     const value         : nat)
                         : list(transfer_param_type) is
   block {
     const transfer_destination : transfer_destination_type = record [
       to_               = to_;
-      token_id          = 0n;
+      token_id          = token_id;
       amount            = value;
     ];
     const transfer_param : transfer_param_type = record [
@@ -70,12 +84,12 @@ function get_tranfer_contract(
 (* Helper to get the entrypoint of current contract *)
 function get_callback(
   const token_address   : address)
-                        : contract(list(receive_supply_type)) is
+                        : contract(receive_supply_type) is
   case (Tezos.get_entrypoint_opt(
     "%receive_supply",
-    token_address)      : option(contract(list(receive_supply_type)))) of
+    token_address)      : option(contract(receive_supply_type))) of
     Some(contr) -> contr
-  | None -> (failwith("Gov/not-callback") : contract(list(receive_supply_type)))
+  | None -> (failwith("Gov/not-callback") : contract(receive_supply_type))
   end;
 
 (* Helper to get the entrypoint of Qnot contract *)
@@ -83,7 +97,7 @@ function get_supply_entrypoint(
   const token_address   : address)
                         : contract(get_supply_type) is
   case (Tezos.get_entrypoint_opt(
-    "%total_supply",
+    "%get_total_supply",
     token_address) : option(contract(get_supply_type))) of
     Some(contr) -> contr
     | None -> (failwith("Gov/not-qnot") : contract(get_supply_type))
@@ -92,29 +106,48 @@ function get_supply_entrypoint(
 
 (* Helper to get proposal cache *)
 function get_prop_cache(
-    const creator       : address;
     const s             : storage_type)
                         : new_proposal_type is
-  case s.temp_proposal_cache[creator] of
+  case s.temp_proposal_cache of
     None -> failwith("Gov/not-creator")
   | Some(v) -> v
   end
 
-(* Remove proposal cache *)
-function rem_prop_cache (
-  const creator         : address;
-  var prop_cache        : prop_cache_type)
-                        : prop_cache_type is
-  block {
-    remove creator from map prop_cache
-  } with prop_cache
-
 
 function is_owner (
-  const _unit           : unit;
-  const _s              : storage_type)
+  const s               : storage_type)
                         : unit is
 block{
-  if Tezos.sender = _s.owner then skip
+  if Tezos.sender = s.owner then skip
   else failwith("Gov/not-owner");
-} with _unit
+} with unit
+
+function get_expected_sender(
+  const s               : storage_type)
+                        : address is
+  case s.expected_sender of
+    Some (v) -> v
+  | None -> failwith("Gov/not-sender")
+  end
+
+function check_set_value (
+  const value           : nat;
+  const s               : storage_type)
+                        : unit is
+block {
+  if value <= 100n * s.accuracy then skip
+  else failwith("Gov/invalid-param-value")
+} with unit
+
+function check_config (
+  const config          : proposal_config_type;
+  const s               : storage_type)
+                        : unit is
+block {
+  const max_value : nat = 100n * s.accuracy;
+  if config.proposal_stake <= max_value
+  and config.voting_quorum  <= max_value
+  and config.support_quorum <= max_value
+  then skip
+  else failwith("Gov/invalid-param-value");
+} with unit

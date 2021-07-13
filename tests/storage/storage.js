@@ -5,9 +5,9 @@ const { alice, bob, eve } = require("../../scripts/sandbox/accounts");
 const { address } = require("../../scripts/sandbox/fa2_latest.json");
 
 const proposalConfig = {
-  proposal_stake: "4",
-  voting_quorum: "4",
-  support_quorum: "66",
+  proposal_stake: "5000",
+  voting_quorum: "40000",
+  support_quorum: "660000",
 };
 
 const defaultStorage = {
@@ -21,8 +21,11 @@ const defaultStorage = {
   },
   proposal_config: proposalConfig,
   pending_owner: null,
-  temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  temp_proposal_cache: null,
+  token_address: address,
+  token_id: 0,
+  expected_sender: null,
+  accuracy: 1000000,
 };
 
 const withPendingOwnershipBob = {
@@ -36,8 +39,11 @@ const withPendingOwnershipBob = {
   },
   proposal_config: proposalConfig,
   pending_owner: bob.pkh,
-  temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  temp_proposal_cache: null,
+  token_address: address,
+  token_id: 0,
+  expected_sender: null,
+  accuracy: 1000000,
 };
 
 const withPendingOwnershipEve = {
@@ -51,11 +57,14 @@ const withPendingOwnershipEve = {
   },
   proposal_config: proposalConfig,
   pending_owner: eve.pkh,
-  temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  temp_proposal_cache: null,
+  token_address: address,
+  token_id: 0,
+  expected_sender: null,
+  accuracy: 1000000,
 };
 
-let w = Buffer.from("dsadas", "ascii").toString("hex");
+const w = Buffer.from("dsadas", "ascii").toString("hex");
 const proposals = MichelsonMap.fromLiteral({
   0: {
     creator: alice.pkh,
@@ -67,7 +76,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2031-01-01T00:00:00Z",
     status: { pending: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   1: {
     creator: alice.pkh,
@@ -79,7 +88,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2030-01-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   2: {
     creator: alice.pkh,
@@ -91,7 +100,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2090-01-01T00:00:00Z",
     status: { banned: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   3: {
     creator: alice.pkh,
@@ -103,7 +112,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-01-01T00:00:00Z",
     status: { approved: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   4: {
     creator: alice.pkh,
@@ -115,7 +124,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2030-01-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
   5: {
     creator: alice.pkh,
@@ -127,7 +136,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 20,
   },
   6: {
     creator: alice.pkh,
@@ -139,7 +148,7 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 20,
   },
   7: {
     creator: alice.pkh,
@@ -151,20 +160,22 @@ const proposals = MichelsonMap.fromLiteral({
     end_date: "2021-06-01T00:00:00Z",
     status: { voting: null },
     config: proposalConfig,
-    fixed_supply: 1000,
+    collateral: 10,
   },
 });
 
-let votes = new MichelsonMap();
+const votes = new MichelsonMap();
 votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
 
-let balances = new MichelsonMap();
+const balances = new MichelsonMap();
+balances.set({ account: alice.pkh, proposal: 4 }, 1111); //does not participate in the claim
 balances.set({ account: alice.pkh, proposal: 5 }, 1);
+balances.set({ account: alice.pkh, proposal: 6 }, 1);
 
-let locked_balances = {
+const locked_balances = {
   balances: balances,
   proposals: MichelsonMap.fromLiteral({
-    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [5],
+    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [4, 5, 6],
   }),
 };
 
@@ -176,8 +187,11 @@ const withProposals = {
   locked_balances: locked_balances,
   proposal_config: proposalConfig,
   pending_owner: null,
-  temp_proposal_cache: MichelsonMap.fromLiteral({}),
-  qnot_address: address,
+  temp_proposal_cache: null,
+  token_address: address,
+  token_id: 0,
+  expected_sender: null,
+  accuracy: 1000000,
 };
 
 const storages = {

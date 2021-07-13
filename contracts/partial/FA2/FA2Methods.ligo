@@ -248,3 +248,13 @@ function transfer(
   block {
     const store : quipu_storage = transfer_sender_check(params, s, full_param);
   } with List.fold(iterate_transfer, params, store)
+
+
+function get_total_supply(
+  const token_id        : token_id;
+  const contr           : contract(nat);
+  const s               : quipu_storage)
+                        : return is
+  block {
+    const res : token_info = get_token_info(token_id, s);
+  } with (list [Tezos.transaction(res.total_supply, 0tz, contr)], s)

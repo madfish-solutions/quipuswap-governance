@@ -8,20 +8,19 @@ const { alice } = require("../scripts/sandbox/accounts");
 
 describe("Voting test", async function () {
   let contract;
+  let fa2_contract;
   before(async () => {
     try {
       Tezos.setSignerProvider(signerAlice);
       const { storages } = require("./storage/storage");
 
-      let deployedContract = await migrate(
+      const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["withProposals"],
       );
       contract = await Tezos.contract.at(deployedContract);
-
       fa2_contract = await Tezos.contract.at(address);
-
       const update_op = await fa2_contract.methods
         .update_operators([
           {
@@ -40,120 +39,144 @@ describe("Voting test", async function () {
   });
 
   describe("Testing entrypoint: add_vote", async function () {
-    it("Invalid proposal id", async function () {
+    it("Revert vote for a non-existent proposal", async function () {
       await rejects(contract.methods.vote("10", "for", 1).send(), err => {
         strictEqual(err.message, "Gov/bad-proposal");
         return true;
       });
     });
-    it("The voting period is over", async function () {
+    it("Revert vote for a ended proposal", async function () {
       await rejects(contract.methods.vote("3", "for", 1).send(), err => {
         strictEqual(err.message, "Gov/voting-over");
         return true;
       });
     });
-    it("Voting has not started yet", async function () {
+    it("Revert vote for a not-started proposal", async function () {
       await rejects(contract.methods.vote("0", "for", 1).send(), err => {
         strictEqual(err.message, "Gov/voting-not-started");
         return true;
       });
     });
-    it("This proposal has been blocked by the administrator", async function () {
+    it("Revert vote for a banned proposal", async function () {
       await rejects(contract.methods.vote("2", "for", 1).send(), err => {
         strictEqual(err.message, "Gov/proposal-banned");
         return true;
       });
     });
-    it("Successful new vote", async function () {
-      let op = await contract.methods.vote("4", "for", 1).send();
+    it("Should allow voting for the same", async function () {
+      const op = await contract.methods.vote("4", "for", 50).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(4);
-      strictEqual(1, proposal.votes_for.toNumber());
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
+      strictEqual(proposal.votes_for.toNumber(), 50);
+    });
+    it("Should allow voting twice for the same proposal", async function () {
+      const op = await contract.methods.vote("4", "for", 1).send();
+      await op.confirmation();
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
+      strictEqual(proposal.votes_for.toNumber(), 51);
+    });
+    it("Should allow changing the vote from for to against", async function () {
+      const op = await contract.methods.vote("4", "against", 1).send();
+      await op.confirmation();
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(4);
+      strictEqual(proposal.votes_for.toNumber(), 0);
+      strictEqual(proposal.votes_against.toNumber(), 52);
     });
   });
   describe("Testing entrypoint: Claim", async function () {
-    it("Fail if not claiming amount", async function () {
+    it("Revert to claim collateral if collateral amount less 0", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.claim("unit").send(), err => {
         strictEqual(err.message, "Gov/no-claim");
         return true;
       });
     });
-    it("Successful Claim", async function () {
+    it("Should allow to claim collateral after voting is finished from all available proposals", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.claim("unit").send();
-      await op.confirmation();
-      let storage = await contract.storage();
+      let fa2 = await fa2_contract.storage();
+      let acc = await fa2.account_info.get(alice.pkh);
+      const old_balance = await acc.balances.get("0").toNumber();
 
+      const op = await contract.methods.claim("unit").send();
+      await op.confirmation();
+      const storage = await contract.storage();
       const locked_balance = await storage.locked_balances.balances.get({
         proposal: 5,
         account: alice.pkh,
       });
+
+      fa2 = await fa2_contract.storage();
+      acc = await fa2.account_info.get(alice.pkh);
+      const new_balance = await acc.balances.get("0").toNumber();
+
+      strictEqual(new_balance, old_balance + 42);
       strictEqual(locked_balance, undefined);
     });
   });
   describe("Testing entrypoint: Finalize voting", async function () {
-    it("Fail if proposal not started or finalized", async function () {
+    it("Revert to finalizing proposal if proposal is finalized", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.finalize_voting(2).send(), err => {
         strictEqual(err.message, "Gov/not-voting-period");
         return true;
       });
     });
-    it("Fail if voting period not over", async function () {
+    it("Revert to finalizing proposal if voting period not over", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.finalize_voting(1).send(), err => {
         strictEqual(err.message, "Gov/voting-not-over");
         return true;
       });
     });
-    it("Successful finalized: Underrated", async function () {
+    it("Should allow to count the voting results with the result: Underrated", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(5).send();
+      const op = await contract.methods.finalize_voting(5).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(5);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(5);
       notStrictEqual(proposal.status["underrated"], undefined);
     });
-    it("Successful finalized: Rejected", async function () {
+    it("Should allow to count the voting results with the result: Rejected", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(6).send();
+      const op = await contract.methods.finalize_voting(6).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(6);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(6);
       notStrictEqual(proposal.status["rejected"], undefined);
     });
-    it("Successful finalized: Approved", async function () {
+    it("Should allow to count the voting results with the result: Approved", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.finalize_voting(7).send();
+      const op = await contract.methods.finalize_voting(7).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(7);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(7);
       notStrictEqual(proposal.status["approved"], undefined);
     });
   });
   describe("Testing entrypoint: Activate_proposal", async function () {
-    it("Only the owner can call this method", async function () {
+    it("Revert activate proposal if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(contract.methods.activate_proposal(1).send(), err => {
         strictEqual(err.message, "Gov/not-owner");
         return true;
       });
     });
-    it("Fail if proposal status not approved", async function () {
+    it("Revert activate proposal if proposal status not Approved", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(contract.methods.activate_proposal(1).send(), err => {
         strictEqual(err.message, "Gov/not-approved");
         return true;
       });
     });
-    it("Successful activate proposal", async function () {
+    it("Should allow to activate proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let op = await contract.methods.activate_proposal(7).send();
+      const op = await contract.methods.activate_proposal(7).send();
       await op.confirmation();
-      let storage = await contract.storage();
-      let proposal = await storage.proposals.get(7);
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(7);
       notStrictEqual(proposal.status["activated"], undefined);
     });
   });

@@ -12,25 +12,20 @@ type new_vote_type      is [@layout:comb] record [
   vote                    : vote_type;
 ]
 
-type proposal_config_type is [@layout:comb] record [
-  proposal_stake            : nat;
-  voting_quorum             : nat;
-  support_quorum            : nat
-]
-
 type settings_type      is
     Proposal_stake      of nat
   | Voting_quorum       of nat
   | Support_quorum      of nat
 
-type some_proposal_type is
-    Id                  of nat
-  | Null                of unit
-
-type proposal_setup_type is [@layout:comb] record [
-  settings                 : settings_type;
-  proposal                 : some_proposal_type;
+type proposal_config_type is [@layout:comb] record [
+  proposal_stake            : nat;
+  voting_quorum             : nat;
+  support_quorum            : nat;
 ]
+
+type proposal_setup_type is
+    Setting                of settings_type
+  | Config                 of proposal_config_type
 
 type status_type is
     Pending
@@ -51,7 +46,7 @@ type proposal_type      is [@layout:comb] record [
   end_date                : timestamp;
   status                  : status_type;
   config                  : proposal_config_type;
-  fixed_supply            : nat;
+  collateral              : nat;
 ]
 
 
@@ -78,7 +73,6 @@ type locked_balances_type is [@layout:comb] record [
   balances                : staker_map_type;
   proposals               : staker_proposals_type ;
 ]
-type prop_cache_type is big_map(address, new_proposal_type)
 
 type storage_type       is [@layout:comb] record [
   owner                   : address;
@@ -88,8 +82,11 @@ type storage_type       is [@layout:comb] record [
   locked_balances         : locked_balances_type;
   proposal_config         : proposal_config_type;
   pending_owner           : option (address);
-  temp_proposal_cache     : prop_cache_type;
-  qnot_address            : address;
+  temp_proposal_cache     : option(new_proposal_type);
+  token_address           : address;
+  token_id                : nat;
+  accuracy                : nat;
+  expected_sender         : option(address);
 ]
 
 type return is list (operation) * storage_type
@@ -106,11 +103,9 @@ type transfer_param_type is [@layout:comb] record [
 
 type transfer_type      is list(transfer_param_type)
 
-type receive_supply_type is record[
-  total_supply          :nat
-  ]
+type receive_supply_type is nat
 
-type get_supply_type    is contract(list(receive_supply_type))
+type get_supply_type    is (nat * contract(nat))
 
-[@inline] const zero_address : address =
+const zero_address : address =
   ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);

@@ -4,7 +4,7 @@ function transfer_ownership(
                         : storage_type is
   block {
     (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     (* Does not allow reassignment of the applicant *)
     if s.pending_owner = (None: option (address))
@@ -34,7 +34,7 @@ function cancel_transfer_ownership(
                         : storage_type is
   block {
      (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     if s.pending_owner =/= (None: option (address))
     then skip
@@ -50,42 +50,36 @@ function set_proposal_setup(
                         : storage_type is
   block {
      (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
-    case new_setup.proposal of
-      Id (v) -> {
-        (* Validate  requested proposal *)
-        if not(Big_map.mem(v, s.proposals))
-        then failwith("Gov/bad-proposal")
-        else {
-          (* Update proposal config *)
-          var _proposal : proposal_type := get_proposal(v, s);
-          case new_setup.settings of
-            Proposal_stake (val) -> _proposal := _proposal with record [
-              config.proposal_stake = val
+    case new_setup of
+    (* Update a specific parameter *)
+      Setting (param) -> {
+        case param of
+          Proposal_stake (v) -> {
+            check_set_value(v, s);
+            s := s with record [
+              proposal_config.proposal_stake = v
             ]
-          | Voting_quorum (val) -> _proposal := _proposal with record [
-              config.voting_quorum = val
+          }
+        | Voting_quorum (v) -> {
+            check_set_value(v, s);
+            s := s with record [
+              proposal_config.voting_quorum = v
             ]
-          | Support_quorum (val) -> _proposal := _proposal with record [
-              config.support_quorum = val
-          ]
-          end;
-        }
-      }
-    | Null -> {
-        (* Update global proposals config *)
-        case new_setup.settings of
-          Proposal_stake (v) -> s := s with record [
-            proposal_config.proposal_stake = v
-          ]
-        | Voting_quorum (v) -> s := s with record [
-            proposal_config.voting_quorum = v
-          ]
-        | Support_quorum (v) -> s := s with record [
+          }
+        | Support_quorum (v) -> {
+          check_set_value(v, s);
+          s := s with record [
             proposal_config.support_quorum = v
           ]
+        }
         end;
+      }
+    (* Update full config *)
+    | Config (new_config) -> {
+      check_config(new_config, s);
+      s.proposal_config := new_config
     }
   end
   } with s
@@ -97,15 +91,12 @@ function ban_proposal(
                         : return is
   block {
     (* Check account permission *)
-    is_owner(unit, s);
+    is_owner(s);
 
     (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);
-    if Big_map.mem(prop_id, s.proposals)
-    then skip
-    else failwith("Gov/no-proposal-id");
 
-    if (proposal.status = Pending or proposal.status = Voting)
+    if proposal.status = Pending or proposal.status = Voting
     then skip
     else failwith("Gov/bad-proposal-status");
 
@@ -114,21 +105,9 @@ function ban_proposal(
     s.proposals[prop_id] := proposal;
 
     (* Burning staked user qnots from proposal *)
-    const staker_key : staker_key_type = record [
-      account           = proposal.creator;
-      proposal          = prop_id;
-    ];
-
-    const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
-
-    s.locked_balances.balances := rem_balance(staker_key, s.locked_balances.balances);
-    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
-    user_props := Set.remove(prop_id, user_props);
-    s.locked_balances.proposals[proposal.creator] := user_props;
-
-    const op : operation = transaction(
-      get_tx_param(proposal.creator, zero_address, locked_balance),
+    const op : operation = Tezos.transaction(
+      get_tx_param(proposal.creator, zero_address, s.token_id, proposal.collateral),
       0mutez,
-      get_tranfer_contract(s.qnot_address)
+      get_tranfer_contract(s.token_address)
     );
-  } with ((list[op] : list (operation)), s)
+  } with (list[op], s)

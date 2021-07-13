@@ -9,12 +9,12 @@ function dayToSec(day) {
 describe("Proposal test", async function () {
   Tezos.setSignerProvider(signerAlice);
   let contract;
-  let link = Buffer.from("ipfsLink", "ascii").toString("hex");
+  const link = Buffer.from("ipfsLink", "ascii").toString("hex");
 
   before(async () => {
     try {
       const { storages } = require("./storage/storage");
-      let deployedContract = await migrate(
+      const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["defaultStorage"],
@@ -40,7 +40,7 @@ describe("Proposal test", async function () {
   });
 
   describe("Testing entrypoint: new_proposal", async function () {
-    it("Minimum voting period 3 days", async function () {
+    it("Revert creating proposal with short voting period", async function () {
       await rejects(
         contract.methods.new_proposal(link, link, 1, 1).send(),
         err => {
@@ -49,7 +49,7 @@ describe("Proposal test", async function () {
         },
       );
     });
-    it("Maxium voting period 30 days", async function () {
+    it("Revert creating proposal with long voting period", async function () {
       await rejects(
         contract.methods.new_proposal(link, link, dayToSec(31), 0).send(),
         err => {
@@ -58,7 +58,7 @@ describe("Proposal test", async function () {
         },
       );
     });
-    it("Deferral can't be longer than 30 days", async function () {
+    it("Revert creating proposal with long dererral period", async function () {
       await rejects(
         contract.methods
           .new_proposal(link, link, dayToSec(4), dayToSec(31))
@@ -69,20 +69,20 @@ describe("Proposal test", async function () {
         },
       );
     });
-    it("Successful new proposal", async function () {
-      let op = await contract.methods
+    it("Should create proposal with enough stake", async function () {
+      const op = await contract.methods
         .new_proposal(link, link, dayToSec(4), 0)
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(1, storage.id_count.toNumber());
     });
-    it("Successful new deferred proposal", async function () {
-      let op = await contract.methods
+    it("Should create deferral proposal with enough stake", async function () {
+      const op = await contract.methods
         .new_proposal(link, link, dayToSec(4), dayToSec(15))
         .send();
       await op.confirmation();
-      let storage = await contract.storage();
+      const storage = await contract.storage();
       strictEqual(2, storage.id_count.toNumber());
     });
   });

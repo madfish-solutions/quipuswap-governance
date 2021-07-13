@@ -39,14 +39,3 @@ type update_operator_param is
   | Remove_operator       of operator_param
 type update_operator_params is list(update_operator_param)
 
-type supply_of_response is
-  [@layout:comb]
-  record [
-    total_supply : nat;
-  ]
-
-type supply_params_type is
-  [@layout:comb]
-  record [
-    callback    : contract (list (supply_of_response));
-  ]

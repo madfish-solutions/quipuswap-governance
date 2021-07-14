@@ -54,7 +54,7 @@ function receive_supply(
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(expected_sender, s);
-    s.locked_balances.proposals[expected_sender] := Set.add(s.id_count, staker_proposals);
+    s.user_proposals[expected_sender] := Set.add(s.id_count, staker_proposals);
 
     const collateral_amount : nat =
       total_supply * s.proposal_config.proposal_stake / s.accuracy;
@@ -169,23 +169,23 @@ function add_vote(
     var staker_proposals : set(nat) := get_staker_proposals(Tezos.sender, s);
     if Set.mem(vote.proposal, staker_proposals) then skip
     else {
-      s.locked_balances.proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
+      s.user_proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
     };
 
     (* Stake part *)
-    const staker_key : staker_key_type = record [
-      account           = Tezos.sender;
-      proposal          = vote.proposal;
-    ];
+    // const staker_key : staker_key_type = record [
+    //   account           = Tezos.sender;
+    //   proposal          = vote.proposal;
+    // ];
 
     (* Save the staked amount of the user*)
-    const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
-    var balances : staker_map_type := s.locked_balances.balances;
+    // const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
+    // var balances : staker_map_type := s.locked_balances.balances;
 
-    balances[staker_key] := locked_balance + votes;
-    s.locked_balances := s.locked_balances with record [
-      balances = balances;
-    ];
+    // balances[staker_key] := locked_balance + votes;
+    // s.locked_balances := s.locked_balances with record [
+    //   balances = balances;
+    // ];
 
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.sender, Tezos.self_address, s.token_id, votes),
@@ -212,22 +212,19 @@ function claim(
         if Tezos.now > proposal.end_date or proposal.status = Banned
         then {
           (* Receiving blocked account QNOTs *)
-          const staker_key : staker_key_type = record [
-          account           = Tezos.sender;
-          proposal          = i;
+          const voter_key : voter_key_type = record [
+            voter            = Tezos.sender;
+            proposal         = i;
           ];
 
-          const locked_balance : nat = get_locked_balance(
-            staker_key, s.locked_balances);
+          const locked_tokens : nat = get_user_votes(
+            voter_key, s);
 
           (* Вeletes records of blocked QNOTs*)
           var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
-          if locked_balance = 0n then skip
+          if locked_tokens = 0n then skip
           else {
-            claim_amount := claim_amount + locked_balance;
-            s.locked_balances.balances := rem_balance(
-             staker_key, s.locked_balances.balances
-            );
+            claim_amount := claim_amount + locked_tokens;
             user_props := Set.remove(i, user_props);
           };
 
@@ -238,7 +235,7 @@ function claim(
 
           } else skip;
 
-          s.locked_balances.proposals[Tezos.sender] := user_props;
+          s.user_proposals[Tezos.sender] := user_props;
         } else skip;
       };
     };

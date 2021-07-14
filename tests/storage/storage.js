@@ -15,10 +15,7 @@ const defaultStorage = {
   id_count: "0",
   proposals: MichelsonMap.fromLiteral({}),
   votes: MichelsonMap.fromLiteral({}),
-  locked_balances: {
-    balances: MichelsonMap.fromLiteral({}),
-    proposals: MichelsonMap.fromLiteral({}),
-  },
+  user_proposals: MichelsonMap.fromLiteral({}),
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: null,
@@ -33,10 +30,7 @@ const withPendingOwnershipBob = {
   id_count: "0",
   proposals: MichelsonMap.fromLiteral({}),
   votes: MichelsonMap.fromLiteral({}),
-  locked_balances: {
-    balances: MichelsonMap.fromLiteral({}),
-    proposals: MichelsonMap.fromLiteral({}),
-  },
+  user_proposals: MichelsonMap.fromLiteral({}),
   proposal_config: proposalConfig,
   pending_owner: bob.pkh,
   temp_proposal_cache: null,
@@ -51,10 +45,7 @@ const withPendingOwnershipEve = {
   id_count: "0",
   proposals: MichelsonMap.fromLiteral({}),
   votes: MichelsonMap.fromLiteral({}),
-  locked_balances: {
-    balances: MichelsonMap.fromLiteral({}),
-    proposals: MichelsonMap.fromLiteral({}),
-  },
+  user_proposals: MichelsonMap.fromLiteral({}),
   proposal_config: proposalConfig,
   pending_owner: eve.pkh,
   temp_proposal_cache: null,
@@ -165,26 +156,23 @@ const proposals = MichelsonMap.fromLiteral({
 });
 
 const votes = new MichelsonMap();
+votes.set({ proposal: 4, voter: alice.pkh }, { for: 1 });
 votes.set({ proposal: 5, voter: alice.pkh }, { for: 1 });
+votes.set({ proposal: 6, voter: alice.pkh }, { for: 1 });
 
-const balances = new MichelsonMap();
-balances.set({ account: alice.pkh, proposal: 4 }, 1111); //does not participate in the claim
-balances.set({ account: alice.pkh, proposal: 5 }, 1);
-balances.set({ account: alice.pkh, proposal: 6 }, 1);
-
-const locked_balances = {
-  balances: balances,
-  proposals: MichelsonMap.fromLiteral({
-    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [4, 5, 6],
-  }),
-};
+// const balances = new MichelsonMap();
+// balances.set({ account: alice.pkh, proposal: 4 }, 1111); //does not participate in the claim
+// balances.set({ account: alice.pkh, proposal: 5 }, 1);
+// balances.set({ account: alice.pkh, proposal: 6 }, 1);
 
 const withProposals = {
   owner: alice.pkh,
   id_count: "1",
   proposals: proposals,
   votes: votes,
-  locked_balances: locked_balances,
+  user_proposals: MichelsonMap.fromLiteral({
+    tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb: [4, 5, 6],
+  }),
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: null,

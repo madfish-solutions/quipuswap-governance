@@ -109,7 +109,7 @@ const proposals = MichelsonMap.fromLiteral({
     creator: alice.pkh,
     ipfs_link: w,
     forum_link: w,
-    votes_for: "0",
+    votes_for: "1",
     votes_against: "0",
     start_date: "2020-01-01T10:00:00Z",
     end_date: "2030-01-01T00:00:00Z",

@@ -50,7 +50,7 @@ function receive_supply(
     else skip;
     var start_date : timestamp := Tezos.now + new_prop.deferral;
     var end_date: timestamp := Tezos.now + new_prop.voting_period + new_prop.deferral;
-    var default_status := if new_prop.deferral = 0 then Pending else Voting;
+    var default_status := if new_prop.deferral = 0 then Voting else Pending;
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(expected_sender, s);

@@ -172,21 +172,6 @@ function add_vote(
       s.user_proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
     };
 
-    (* Stake part *)
-    // const staker_key : staker_key_type = record [
-    //   account           = Tezos.sender;
-    //   proposal          = vote.proposal;
-    // ];
-
-    (* Save the staked amount of the user*)
-    // const locked_balance : nat = get_locked_balance(staker_key, s.locked_balances);
-    // var balances : staker_map_type := s.locked_balances.balances;
-
-    // balances[staker_key] := locked_balance + votes;
-    // s.locked_balances := s.locked_balances with record [
-    //   balances = balances;
-    // ];
-
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.sender, Tezos.self_address, s.token_id, votes),
       0mutez,
@@ -200,7 +185,6 @@ function claim(
                         : return is
   block {
     (* Iterates over set prop id and writes unlocked qnot amount for claim *)
-    // var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
     var claim_amount : nat := 0n;
     for i in set get_staker_proposals(Tezos.sender, s) block {
       const proposal : proposal_type = get_proposal(i, s);
@@ -257,8 +241,13 @@ function finalize_voting(
     (* Validate proposal *)
     var proposal : proposal_type := get_proposal(prop_id, s);
 
-    if proposal.status = Voting then skip
+    if proposal.status = Voting
+      or proposal.status = Pending
+      and Tezos.now > proposal.end_date
+    then skip
     else failwith("Gov/not-voting-period");
+
+
 
     if Tezos.now > proposal.end_date then skip
     else failwith("Gov/voting-not-over");

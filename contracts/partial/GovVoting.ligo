@@ -247,8 +247,6 @@ function finalize_voting(
     then skip
     else failwith("Gov/not-voting-period");
 
-
-
     if Tezos.now > proposal.end_date then skip
     else failwith("Gov/voting-not-over");
     const votes : nat = proposal.votes_for + proposal.votes_against;

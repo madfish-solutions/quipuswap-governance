@@ -128,6 +128,14 @@ describe("Voting test", async function () {
         return true;
       });
     });
+    it("Should  allow counting the voting results for a proposal in Pending status and expired voting period", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const op = await contract.methods.finalize_voting(8).send();
+      await op.confirmation();
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(8);
+      notStrictEqual(proposal.status["underrated"], undefined);
+    });
     it("Should allow to count the voting results with the result: Underrated", async function () {
       Tezos.setSignerProvider(signerAlice);
       const op = await contract.methods.finalize_voting(5).send();

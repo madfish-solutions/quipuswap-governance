@@ -209,8 +209,7 @@ function claim(
       if proposal.status = Pending
       then skip
       else {
-        if Tezos.now > proposal.end_date or
-        (proposal.end_date >= Tezos.now and proposal.status = Banned)
+        if Tezos.now > proposal.end_date or proposal.status = Banned
         then {
           (* Receiving blocked account QNOTs *)
           const staker_key : staker_key_type = record [
@@ -238,7 +237,8 @@ function claim(
             user_props := Set.remove(i, user_props);
 
           } else skip;
-           s.locked_balances.proposals[Tezos.sender] := user_props;
+
+          s.locked_balances.proposals[Tezos.sender] := user_props;
         } else skip;
       };
     };

@@ -222,21 +222,23 @@ function claim(
             staker_key, s.locked_balances);
 
           (* Вeletes records of blocked QNOTs*)
+          var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
           if locked_balance = 0n then skip
           else {
             claim_amount := claim_amount + locked_balance;
             s.locked_balances.balances := rem_balance(
              staker_key, s.locked_balances.balances
             );
-            var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
             user_props := Set.remove(i, user_props);
-            s.locked_balances.proposals[Tezos.sender] := user_props;
           };
 
           if Tezos.sender = proposal.creator and not(proposal.status = Banned)
           then {
-            claim_amount := claim_amount + proposal.collateral
+            claim_amount := claim_amount + proposal.collateral;
+            user_props := Set.remove(i, user_props);
+
           } else skip;
+           s.locked_balances.proposals[Tezos.sender] := user_props;
         } else skip;
       };
     };

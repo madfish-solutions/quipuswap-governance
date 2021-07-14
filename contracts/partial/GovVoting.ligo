@@ -1,6 +1,6 @@
-const min_proposal_period : seconds_type = 3 * 86_400;
-const max_proposal_period : seconds_type = 30 * 86_400;
-const max_deferral        : seconds_type = 30 * 86_400;
+const min_proposal_period : seconds_type = 3n * 86_400n;
+const max_proposal_period : seconds_type = 30n * 86_400n;
+const max_deferral        : seconds_type = 30n * 86_400n;
 
 function get_total_supply(
   const new_prop        : new_proposal_type;
@@ -48,9 +48,9 @@ function receive_supply(
     if new_prop.deferral > max_deferral
     then failwith("Gov/long-deferral")
     else skip;
-    var start_date : timestamp := Tezos.now + new_prop.deferral;
-    var end_date: timestamp := Tezos.now + new_prop.voting_period + new_prop.deferral;
-    var default_status := if new_prop.deferral = 0 then Voting else Pending;
+    var start_date : timestamp := Tezos.now + int(new_prop.deferral);
+    var end_date: timestamp := Tezos.now + int(new_prop.voting_period + new_prop.deferral);
+    var default_status := if new_prop.deferral = 0n then Voting else Pending;
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(expected_sender, s);

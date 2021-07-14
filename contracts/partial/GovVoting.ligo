@@ -10,7 +10,7 @@ function get_total_supply(
     s.expected_sender := Some(Tezos.sender);
     s.temp_proposal_cache := Some(new_prop);
     const op : operation = Tezos.transaction(
-      (0n, get_callback(Tezos.self_address)),
+      (s.token_id, get_callback(Tezos.self_address)),
       0mutez,
       get_supply_entrypoint(s.token_address)
     );

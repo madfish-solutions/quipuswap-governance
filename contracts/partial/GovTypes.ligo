@@ -50,7 +50,7 @@ type proposal_type      is [@layout:comb] record [
 ]
 
 
-type seconds_type       is int
+type seconds_type       is nat
 
 type new_proposal_type  is [@layout:comb] record [
   ipfs_link               : bytes;
@@ -60,29 +60,29 @@ type new_proposal_type  is [@layout:comb] record [
 ]
 
 
-type staker_key_type    is [@layout:comb] record [
-  account                 : address;
-  proposal                : id_type;
-]
+// type staker_key_type    is [@layout:comb] record [
+//   account                 : address;
+//   proposal                : id_type;
+// ]
 
-type staker_map_type is big_map(staker_key_type, nat)
+// type staker_map_type is big_map(staker_key_type, nat)
 
 type staker_proposals_type is big_map(address, set(nat))
 
-type locked_balances_type is [@layout:comb] record [
-  balances                : staker_map_type;
-  proposals               : staker_proposals_type ;
-]
+// type locked_balances_type is [@layout:comb] record [
+//   balances                : staker_map_type;
+//   proposals               : staker_proposals_type ;
+// ]
 
 type storage_type       is [@layout:comb] record [
   owner                   : address;
   id_count                : nat;
   proposals               : big_map(id_type, proposal_type);
   votes                   : big_map(voter_key_type, vote_type);
-  locked_balances         : locked_balances_type;
+  user_proposals          : staker_proposals_type ;
   proposal_config         : proposal_config_type;
-  pending_owner           : option (address);
   temp_proposal_cache     : option(new_proposal_type);
+  pending_owner           : option (address);
   token_address           : address;
   token_id                : nat;
   accuracy                : nat;

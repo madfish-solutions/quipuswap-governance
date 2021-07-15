@@ -22,21 +22,21 @@ function get_user_votes (
       end
   end
 
-function get_locked_balance(
-    const staker_key      : staker_key_type;
-    const locked_balances : locked_balances_type)
-                          : nat is
-  case locked_balances.balances[staker_key] of
-    None -> 0n
-  | Some(v) -> v
-  end
+// function get_locked_balance(
+//     const staker_key      : staker_key_type;
+//     const locked_balances : locked_balances_type)
+//                           : nat is
+//   case locked_balances.balances[staker_key] of
+//     None -> 0n
+//   | Some(v) -> v
+//   end
 
 
 function get_staker_proposals (
   const addr            : address;
   const s               : storage_type)
                         : set(nat) is
-  case s.locked_balances.proposals[addr] of
+  case s.user_proposals[addr] of
     None -> (set[] : set(nat))
   | Some(v) -> v
   end
@@ -62,13 +62,13 @@ function get_tx_param(
 
 
 (* Remove staked user qnots *)
-function rem_balance (
-  const key             : staker_key_type;
-  var s                 : staker_map_type)
-                        : staker_map_type is
-  block {
-    remove key from map s
-  } with s
+// function rem_balance (
+//   const key             : staker_key_type;
+//   var s                 : staker_map_type)
+//                         : staker_map_type is
+//   block {
+//     remove key from map s
+//   } with s
 
 
 function get_tranfer_contract(

@@ -68,14 +68,14 @@ describe("Voting test", async function () {
       await op.confirmation();
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
-      strictEqual(proposal.votes_for.toNumber(), 50);
+      strictEqual(proposal.votes_for.toNumber(), 51);
     });
     it("Should allow voting twice for the same proposal", async function () {
       const op = await contract.methods.vote("4", "for", 1).send();
       await op.confirmation();
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
-      strictEqual(proposal.votes_for.toNumber(), 51);
+      strictEqual(proposal.votes_for.toNumber(), 52);
     });
     it("Should allow changing the vote from for to against", async function () {
       const op = await contract.methods.vote("4", "against", 1).send();
@@ -83,7 +83,7 @@ describe("Voting test", async function () {
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 0);
-      strictEqual(proposal.votes_against.toNumber(), 52);
+      strictEqual(proposal.votes_against.toNumber(), 53);
     });
   });
   describe("Testing entrypoint: Claim", async function () {
@@ -103,17 +103,14 @@ describe("Voting test", async function () {
       const op = await contract.methods.claim("unit").send();
       await op.confirmation();
       const storage = await contract.storage();
-      const locked_balance = await storage.locked_balances.balances.get({
-        proposal: 5,
-        account: alice.pkh,
-      });
+      const user_proposals = await storage.user_proposals.get(alice.pkh);
 
       fa2 = await fa2_contract.storage();
       acc = await fa2.account_info.get(alice.pkh);
       const new_balance = await acc.balances.get("0").toNumber();
 
       strictEqual(new_balance, old_balance + 42);
-      strictEqual(locked_balance, undefined);
+      strictEqual(user_proposals.includes(5), false);
     });
   });
   describe("Testing entrypoint: Finalize voting", async function () {
@@ -130,6 +127,14 @@ describe("Voting test", async function () {
         strictEqual(err.message, "Gov/voting-not-over");
         return true;
       });
+    });
+    it("Should  allow counting the voting results for a proposal in Pending status and expired voting period", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const op = await contract.methods.finalize_voting(8).send();
+      await op.confirmation();
+      const storage = await contract.storage();
+      const proposal = await storage.proposals.get(8);
+      notStrictEqual(proposal.status["underrated"], undefined);
     });
     it("Should allow to count the voting results with the result: Underrated", async function () {
       Tezos.setSignerProvider(signerAlice);

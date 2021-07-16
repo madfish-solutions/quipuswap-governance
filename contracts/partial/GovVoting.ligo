@@ -204,7 +204,7 @@ function claim(
           const locked_tokens : nat = get_user_votes(
             voter_key, s);
 
-          (* Вeletes records of blocked QNOTs*)
+          (* Deletes records of blocked QNOTs*)
           var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
           if locked_tokens = 0n then skip
           else {
@@ -243,7 +243,6 @@ function finalize_voting(
 
     if proposal.status = Voting
       or proposal.status = Pending
-      and Tezos.now > proposal.end_date
     then skip
     else failwith("Gov/not-voting-period");
 

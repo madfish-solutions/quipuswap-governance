@@ -223,6 +223,20 @@ def operator_remove(owner, operator, token_id=0):
     }
 
 
+# apparently somehow empty set is stored as None in python object
+# this causes michelson interpreter to fail
+# transform known set Nones to empty lists for the sake of reusing them later
+def apply_pytezos_fixes(storage):
+    result = {}
+    up = storage["user_proposals"]
+    for user, proposals in up.items():
+        if proposals == None:
+            proposals = []
+        result[user] = proposals
+    storage["user_proposals"] = result
+    return storage
+
+
 class LocalChain():
     def __init__(self, init_storage):
         self.storage = init_storage 
@@ -242,7 +256,7 @@ class LocalChain():
             sender=sender    
         )
         self.balance = new_balance
-        self.storage = res.storage
+        self.storage = apply_pytezos_fixes(res.storage)
         self.last_res = res
 
         # calculate total xtz payouts from contract

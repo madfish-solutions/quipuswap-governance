@@ -153,6 +153,18 @@ const proposals = MichelsonMap.fromLiteral({
     config: proposalConfig,
     collateral: 10,
   },
+  8: {
+    creator: alice.pkh,
+    ipfs_link: w,
+    forum_link: w,
+    votes_for: "0",
+    votes_against: "0",
+    start_date: "2021-05-01T10:00:00Z",
+    end_date: "2021-06-01T00:00:00Z",
+    status: { pending: null },
+    config: proposalConfig,
+    collateral: 10,
+  },
 });
 
 const votes = new MichelsonMap();

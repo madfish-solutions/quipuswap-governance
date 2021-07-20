@@ -41,7 +41,7 @@ describe("Voting test", async function () {
   describe("Testing entrypoint: add_vote", async function () {
     it("Revert vote for a non-existent proposal", async function () {
       await rejects(contract.methods.vote("10", "for", 1).send(), err => {
-        strictEqual(err.message, "Gov/bad-proposal");
+        strictEqual(err.message, "Gov/not-prop-id");
         return true;
       });
     });
@@ -111,6 +111,14 @@ describe("Voting test", async function () {
 
       strictEqual(new_balance, old_balance + 21);
       strictEqual(user_proposals.includes(5), false);
+    });
+
+    it("Revert to claim if alice has already claimed collateral", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await rejects(contract.methods.claim(5).send(), err => {
+        strictEqual(err.message, "Gov/no-claim");
+        return true;
+      });
     });
   });
   describe("Testing entrypoint: Finalize voting", async function () {

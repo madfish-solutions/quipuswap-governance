@@ -87,10 +87,24 @@ describe("Voting test", async function () {
     });
   });
   describe("Testing entrypoint: Claim", async function () {
-    it("Revert to claim collateral if collateral amount less 0", async function () {
-      Tezos.setSignerProvider(signerBob);
+    it("Revert to claiming for non existent proposal", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(contract.methods.claim(99).send(), err => {
+        strictEqual(err.message, "Gov/not-prop-id");
+        return true;
+      });
+    });
+    it("Revert to claim if alice does not have this proposal", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(contract.methods.claim(1).send(), err => {
+        strictEqual(err.message, "Gov/not-proposal");
+        return true;
+      });
+    });
+    it("Revert to claim if voting period not over", async function () {
+      Tezos.setSignerProvider(signerAlice);
       await rejects(contract.methods.claim(4).send(), err => {
-        strictEqual(err.message, "Gov/no-claim");
+        strictEqual(err.message, "Gov/no-ended-voting");
         return true;
       });
     });
@@ -111,14 +125,6 @@ describe("Voting test", async function () {
 
       strictEqual(new_balance, old_balance + 21);
       strictEqual(user_proposals.includes(5), false);
-    });
-
-    it("Revert to claim if alice has already claimed collateral", async function () {
-      Tezos.setSignerProvider(signerBob);
-      await rejects(contract.methods.claim(5).send(), err => {
-        strictEqual(err.message, "Gov/no-claim");
-        return true;
-      });
     });
   });
   describe("Testing entrypoint: Finalize voting", async function () {

@@ -183,6 +183,7 @@ function claim(
   block {
     var claim_amount : nat := 0n;
     const proposal : proposal_type = get_proposal(proposal_id, s);
+    var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
     (* Validate proposal status *)
     if proposal.status = Pending
     then skip
@@ -199,24 +200,20 @@ function claim(
           voter_key, s);
 
         (* Deletes records of blocked QNOTs*)
-        var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
-        if locked_tokens = 0n then skip
-        else {
-          claim_amount := claim_amount + locked_tokens;
-          user_props := Set.remove(proposal_id, user_props);
-        };
+
+        claim_amount := if locked_tokens > 0n then claim_amount + locked_tokens else 0n;
 
         if Tezos.sender = proposal.creator and not(proposal.status = Banned)
-        then {
-          claim_amount := claim_amount + proposal.collateral;
-          user_props := Set.remove(proposal_id, user_props);
-
-        } else skip;
+        then claim_amount := if Set.mem(proposal_id, user_props)
+          then claim_amount + proposal.collateral
+          else claim_amount
+        else skip;
 
         s.user_proposals[Tezos.sender] := user_props;
       } else skip;
     };
-    if claim_amount > 0n then skip
+    if claim_amount > 0n
+    then s.user_proposals[Tezos.sender] := Set.remove(proposal_id, user_props)
     else failwith("Gov/no-claim");
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, Tezos.sender,  s.token_id, claim_amount),

@@ -195,7 +195,6 @@ function claim(
 
     (* Removing an offer from unprocessed offers *)
     s.user_proposals[Tezos.sender] := Set.remove(proposal_id, user_props);
-    s.user_proposals[Tezos.sender] := user_props;
 
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, Tezos.sender,  s.token_id, claim_amount),

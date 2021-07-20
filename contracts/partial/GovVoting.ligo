@@ -140,7 +140,7 @@ function add_vote(
           s.votes[voter_key] := Against(old_votes + nv);
         }
     end;
-    
+
     (* Сhanges the status of the proposal to
     "Voting" if the status was not updated earlier *)
     if proposal.status = Pending
@@ -169,40 +169,34 @@ function claim(
   var s                 : storage_type)
                         : return is
   block {
-    var claim_amount : nat := 0n;
+    (* Validate proposal *)
     const proposal : proposal_type = get_proposal(proposal_id, s);
     var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
-    (* Validate proposal status *)
-    if proposal.status = Pending
+    if Set.mem(proposal_id, user_props) then skip
+    else failwith("Gov/not-proposal");
+
+    if Tezos.now > proposal.end_date or proposal.status = Banned
     then skip
-    else {
-      if Tezos.now > proposal.end_date or proposal.status = Banned
-      then {
-        (* Receiving blocked account QNOTs *)
-        const voter_key : voter_key_type = record [
+    else failwith("Gov/no-ended-voting");
+
+    (* Receiving blocked account QNOTs *)
+    const voter_key : voter_key_type = record [
           voter            = Tezos.sender;
           proposal         = proposal_id;
         ];
 
-        const locked_tokens : nat = get_user_votes(
-          voter_key, s);
+    var claim_amount : nat := get_user_votes(voter_key, s);
 
-        (* Deletes records of blocked QNOTs*)
+    (* Adding a collateral from proposal
+      if Sender is the creator and proposal not banned*)
+    if Tezos.sender = proposal.creator and not(proposal.status = Banned)
+    then claim_amount := claim_amount + proposal.collateral
+    else skip;
 
-        claim_amount := if locked_tokens > 0n then claim_amount + locked_tokens else 0n;
+    (* Removing an offer from unprocessed offers *)
+    s.user_proposals[Tezos.sender] := Set.remove(proposal_id, user_props);
+    s.user_proposals[Tezos.sender] := user_props;
 
-        if Tezos.sender = proposal.creator and not(proposal.status = Banned)
-        then claim_amount := if Set.mem(proposal_id, user_props)
-          then claim_amount + proposal.collateral
-          else claim_amount
-        else skip;
-
-        s.user_proposals[Tezos.sender] := user_props;
-      } else skip;
-    };
-    if claim_amount > 0n
-    then s.user_proposals[Tezos.sender] := Set.remove(proposal_id, user_props)
-    else failwith("Gov/no-claim");
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.self_address, Tezos.sender,  s.token_id, claim_amount),
       0mutez,
@@ -210,6 +204,53 @@ function claim(
     );
 
   } with (list[op], s)
+
+
+// function claim(
+//   const proposal_id     : id_type;
+//   var s                 : storage_type)
+//                         : return is
+//   block {
+//     var claim_amount : nat := 0n;
+//     const proposal : proposal_type = get_proposal(proposal_id, s);
+//     var user_props : set(id_type) := get_staker_proposals(Tezos.sender, s);
+//     (* Validate proposal status *)
+//     if proposal.status = Pending then skip
+//     else {
+//       if Tezos.now > proposal.end_date or proposal.status = Banned
+//       then {
+//         (* Receiving blocked account QNOTs *)
+//         const voter_key : voter_key_type = record [
+//           voter            = Tezos.sender;
+//           proposal         = proposal_id;
+//         ];
+
+//         const locked_tokens : nat = get_user_votes(
+//           voter_key, s);
+
+//         (* Deletes records of blocked QNOTs*)
+
+//         claim_amount := if locked_tokens > 0n then claim_amount + locked_tokens else 0n;
+
+//         if Tezos.sender = proposal.creator and not(proposal.status = Banned)
+//         then claim_amount := if Set.mem(proposal_id, user_props)
+//           then claim_amount + proposal.collateral
+//           else claim_amount
+//         else skip;
+
+//         s.user_proposals[Tezos.sender] := user_props;
+//       } else skip;
+//     };
+//     if claim_amount > 0n
+//     then s.user_proposals[Tezos.sender] := Set.remove(proposal_id, user_props)
+//     else failwith("Gov/no-claim");
+//     const op : operation = Tezos.transaction(
+//       get_tx_param(Tezos.self_address, Tezos.sender,  s.token_id, claim_amount),
+//       0mutez,
+//       get_tranfer_contract(s.token_address)
+//     );
+
+//   } with (list[op], s)
 
 // function claim(
 //   var s                 : storage_type)

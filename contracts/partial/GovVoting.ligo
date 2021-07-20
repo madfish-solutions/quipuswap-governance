@@ -112,47 +112,35 @@ function add_vote(
 
     const old_votes : nat = get_user_votes(voter_key, s);
 
+    (* remove old votes *)
+    case s.votes[voter_key] of
+      Some (vote) ->
+        case vote of
+          For (ov)-> {
+            proposal.votes_for := abs(proposal.votes_for - ov);
+          }
+        | Against (ov) -> {
+            proposal.votes_against := abs(proposal.votes_against - ov);
+          }
+        end
+      | None -> skip
+    end;
+
+    (* add new votes *)
     var votes : nat := 0n;
     case vote.vote of
-      For (nv) -> {
-        votes := nv;
-        case s.votes[voter_key] of
-          Some (vote) ->
-            case vote of
-              For (_)-> {
-                proposal.votes_for := proposal.votes_for + nv;
-              }
-            | Against (ov) -> {
-                proposal.votes_against := abs(proposal.votes_against - ov);
-                proposal.votes_for := proposal.votes_for + ov + nv;
-              }
-            end
-        | None -> {
-            proposal.votes_for := proposal.votes_for + nv;
-          }
-        end;
-        s.votes[voter_key] := For(old_votes + nv);
-      }
-    | Against (nv) -> {
-        votes := nv;
-        case s.votes[voter_key] of
-          Some (vote) ->
-            case vote of
-              For (ov)-> {
-                proposal.votes_for := abs(proposal.votes_for - ov);
-                proposal.votes_against := proposal.votes_against + ov + nv;
-              }
-            | Against (_) -> {
-                proposal.votes_against := proposal.votes_against + nv;
-              }
-            end
-        | None -> {
-            proposal.votes_against := proposal.votes_against + nv;
-          }
-        end;
-        s.votes[voter_key] := Against(old_votes + nv);
-      }
+        For (nv) -> {
+          votes := nv;
+          proposal.votes_for := proposal.votes_for + old_votes + nv;
+          s.votes[voter_key] := For(old_votes + nv);
+        }
+      | Against (nv) -> {
+          votes := nv;
+          proposal.votes_against := proposal.votes_against + old_votes + nv;
+          s.votes[voter_key] := Against(old_votes + nv);
+        }
     end;
+    
     (* Сhanges the status of the proposal to
     "Voting" if the status was not updated earlier *)
     if proposal.status = Pending
@@ -161,7 +149,7 @@ function add_vote(
 
     s.proposals[vote.proposal] := proposal;
 
-     (* Add proposal for future claim *)
+    (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(Tezos.sender, s);
     if Set.mem(vote.proposal, staker_proposals) then skip
     else {

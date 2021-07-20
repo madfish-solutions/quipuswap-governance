@@ -12,7 +12,7 @@ type parameter_type is
   | New_proposal              of new_proposal_type
   | Receive_supply            of receive_supply_type
   | Vote                      of new_vote_type
-  | Claim                     of unit
+  | Claim                     of id_type
   | Finalize_voting           of id_type
   | Activate_proposal         of id_type
 
@@ -29,7 +29,7 @@ function main(
     | New_proposal(params)             -> get_total_supply(params, s)
     | Receive_supply (params)          -> (receive_supply(params, s))
     | Vote(params)                     -> add_vote(params, s)
-    | Claim(_)                         -> claim(s)
+    | Claim (params)                   -> claim(params, s)
     | Finalize_voting(params)          -> ((nil : list(operation)), finalize_voting(params, s))
     | Activate_proposal(params)        -> ((nil : list(operation)), activate_proposal(params, s))
   end

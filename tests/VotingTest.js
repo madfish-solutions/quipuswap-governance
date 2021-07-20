@@ -89,18 +89,18 @@ describe("Voting test", async function () {
   describe("Testing entrypoint: Claim", async function () {
     it("Revert to claim collateral if collateral amount less 0", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(contract.methods.claim("unit").send(), err => {
+      await rejects(contract.methods.claim(4).send(), err => {
         strictEqual(err.message, "Gov/no-claim");
         return true;
       });
     });
-    it("Should allow to claim collateral after voting is finished from all available proposals", async function () {
+    it("Should allow to claim collateral after voting is finished from available proposal", async function () {
       Tezos.setSignerProvider(signerAlice);
       let fa2 = await fa2_contract.storage();
       let acc = await fa2.account_info.get(alice.pkh);
       const old_balance = await acc.balances.get("0").toNumber();
 
-      const op = await contract.methods.claim("unit").send();
+      const op = await contract.methods.claim(5).send();
       await op.confirmation();
       const storage = await contract.storage();
       const user_proposals = await storage.user_proposals.get(alice.pkh);
@@ -109,7 +109,7 @@ describe("Voting test", async function () {
       acc = await fa2.account_info.get(alice.pkh);
       const new_balance = await acc.balances.get("0").toNumber();
 
-      strictEqual(new_balance, old_balance + 42);
+      strictEqual(new_balance, old_balance + 21);
       strictEqual(user_proposals.includes(5), false);
     });
   });

@@ -185,7 +185,6 @@ function claim(
   var s                 : storage_type)
                         : return is
   block {
-    (* Iterates over set prop id and writes unlocked qnot amount for claim *)
     var claim_amount : nat := 0n;
     const proposal : proposal_type = get_proposal(proposal_id, s);
     (* Validate proposal status *)

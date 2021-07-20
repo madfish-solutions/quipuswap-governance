@@ -90,10 +90,6 @@ function add_vote(
                         : return is
   block {
     (* Validate requsted proposal *)
-    if Big_map.mem(vote.proposal, s.proposals)
-    then skip
-    else failwith("Gov/bad-proposal");
-
     var proposal : proposal_type := get_proposal(vote.proposal, s);
 
     if Tezos.now < proposal.end_date

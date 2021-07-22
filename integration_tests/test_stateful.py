@@ -41,7 +41,7 @@ class StatusIsCorrect(RuleBasedStateMachine):
     @rule(sender=st.sampled_from([alice, bob, me]))
     def claim(self, sender):
         try:
-            res = self.chain.execute(self.ct.claim(), sender=sender)
+            res = self.chain.execute(self.ct.claim(0), sender=sender)
         except MichelsonRuntimeError:
             event("cant claim")
 

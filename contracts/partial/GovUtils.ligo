@@ -22,14 +22,20 @@ function get_user_votes (
       end
   end
 
-// function get_locked_balance(
-//     const staker_key      : staker_key_type;
-//     const locked_balances : locked_balances_type)
-//                           : nat is
-//   case locked_balances.balances[staker_key] of
-//     None -> 0n
-//   | Some(v) -> v
-//   end
+function check_votes(
+    const votes           : vote_type)
+                          : unit is
+  block {
+  const votes_count = case votes of
+    For (v) -> v
+  | Against (v) -> v
+  end;
+
+  if votes_count > 0n then skip
+  else failwith("Gov/no-votes")
+
+} with unit
+
 
 
 function get_staker_proposals (

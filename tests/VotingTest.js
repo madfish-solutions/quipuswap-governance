@@ -63,6 +63,12 @@ describe("Voting test", async function () {
         return true;
       });
     });
+    it("Revert vote with 0 votes", async function () {
+      await rejects(contract.methods.vote("4", "for", 0).send(), err => {
+        strictEqual(err.message, "Gov/no-votes");
+        return true;
+      });
+    });
     it("Should allow voting for the same", async function () {
       const op = await contract.methods.vote("4", "for", 50).send();
       await op.confirmation();

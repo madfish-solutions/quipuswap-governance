@@ -151,10 +151,7 @@ function add_vote(
 
     (* Add proposal for future claim *)
     var staker_proposals : set(nat) := get_staker_proposals(Tezos.sender, s);
-    if Set.mem(vote.proposal, staker_proposals) then skip
-    else {
-      s.user_proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
-    };
+    s.user_proposals[Tezos.sender] := Set.add(vote.proposal, staker_proposals);
 
     const op : operation = Tezos.transaction(
       get_tx_param(Tezos.sender, Tezos.self_address, s.token_id, votes),
@@ -175,7 +172,7 @@ function claim(
     if Set.mem(proposal_id, user_props) then skip
     else failwith("Gov/not-proposal");
 
-    if Tezos.now > proposal.end_date or proposal.status = Banned
+    if Tezos.now >= proposal.end_date or proposal.status = Banned
     then skip
     else failwith("Gov/no-ended-voting");
 

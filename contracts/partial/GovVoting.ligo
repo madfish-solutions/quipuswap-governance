@@ -104,6 +104,9 @@ function add_vote(
     then failwith("Gov/proposal-banned")
     else skip;
 
+    (* Check vote count *)
+    check_votes(vote.vote);
+
     (* Update proposal votes *)
     const voter_key : voter_key_type = record [
       proposal          = vote.proposal;

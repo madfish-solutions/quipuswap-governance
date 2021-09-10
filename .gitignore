@@ -282,3 +282,5 @@ docker/.env
 
 # Tezos contract
 contract_latest.json
+yarn.lock
+builds/

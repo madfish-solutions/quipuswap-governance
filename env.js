@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { alice } = require("./scripts/sandbox/accounts");
+const { alice, dev } = require("./scripts/sandbox/accounts");
 
 module.exports = {
   buildsDir: "builds",
@@ -11,6 +11,11 @@ module.exports = {
       rpc: "http://localhost:8732",
       network_id: "*",
       secretKey: alice.sk,
+    },
+    granadanet: {
+      rpc: "https://granadanet.smartpy.io",
+      network_id: "*",
+      secretKey: dev.sk,
     },
     edonet: {
       rpc: "https://testnet-tezos.giganode.io",

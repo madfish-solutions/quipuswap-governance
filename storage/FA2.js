@@ -3,12 +3,12 @@ const { MichelsonMap } = require("@taquito/michelson-encoder");
 const { alice, bob } = require("../scripts/sandbox/accounts");
 
 const metadata = MichelsonMap.fromLiteral({
-  "": Buffer.from("tezos-storage:paul", "ascii").toString("hex"),
-  paul: Buffer.from(
+  "": Buffer.from("tezos-storage:gov", "ascii").toString("hex"),
+  gov: Buffer.from(
     JSON.stringify({
       version: "v1.0.0",
       description: "Quipuswap Gov Token",
-      authors: ["<degentech@gmail.com>"],
+      authors: ["Madfish.Solutions"],
       source: {
         tools: ["Ligo", "Flextesa"],
         location: "https://ligolang.org/",

@@ -22,7 +22,7 @@ function receive_supply(
     var s               : storage_type)
                         : return is
   block {
-    // (* Validate response *)
+    (* Validate response *)
     if total_supply > 0n then skip
     else failwith("Gov/bad-supply-response");
 
@@ -64,6 +64,7 @@ function receive_supply(
       creator                 = expected_sender;
       ipfs_link               = new_prop.ipfs_link;
       forum_link              = new_prop.forum_link;
+      github_link             = new_prop.github_link;
       votes_for               = 0n;
       votes_against           = 0n;
       start_date              = start_date;
@@ -71,12 +72,12 @@ function receive_supply(
       status                  = default_status;
       config                  = s.proposal_config;
       collateral              = collateral_amount;
+      voters                  = 0n;
     ];
 
     s.id_count := s.id_count + 1n;
 
     (* Stake qnots *)
-
     const op : operation = Tezos.transaction(
       get_tx_param(expected_sender, Tezos.self_address, s.token_id, collateral_amount),
       0mutez,
@@ -115,6 +116,9 @@ function add_vote(
     ];
 
     const old_votes : nat = get_user_votes(voter_key, s);
+
+    (* Update number of uniq voters *)
+    proposal.voters := if old_votes = 0n then proposal.voters + 1n else proposal.voters;
 
     var votes : nat := 0n;
     case vote.vote of

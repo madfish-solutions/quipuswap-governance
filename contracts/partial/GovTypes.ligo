@@ -40,6 +40,7 @@ type proposal_type      is [@layout:comb] record [
   creator                 : address;
   ipfs_link               : bytes;
   forum_link              : bytes;
+  github_link             : bytes;
   votes_for               : nat;
   votes_against           : nat;
   start_date              : timestamp;
@@ -47,14 +48,15 @@ type proposal_type      is [@layout:comb] record [
   status                  : status_type;
   config                  : proposal_config_type;
   collateral              : nat;
+  voters                  : nat;
 ]
-
 
 type seconds_type       is int
 
 type new_proposal_type  is [@layout:comb] record [
   ipfs_link               : bytes;
   forum_link              : bytes;
+  github_link             : bytes;
   voting_period           : seconds_type;
   deferral                : seconds_type;
 ]

@@ -4,14 +4,14 @@ const {
   notStrictEqual,
   deepStrictEqual,
 } = require("assert");
-const { Tezos, signerAlice, signerBob, alice } = require("./utils/cli");
+const { signerAlice, signerBob, alice, Tezos } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
 const { bob } = require("../scripts/sandbox/accounts");
 
 describe("Admin test", async function () {
   let contract;
 
-  let s = [
+  let storageList = [
     "withProposals",
     "withProposals",
     "withProposals",
@@ -34,10 +34,14 @@ describe("Admin test", async function () {
 
   let deployedContract;
   beforeEach(async () => {
-    const q = s.pop();
+    const storageName = storageList.pop();
     try {
       const { storages } = require("./storage/storage");
-      deployedContract = await migrate(Tezos, "Governance", storages[q]);
+      deployedContract = await migrate(
+        Tezos,
+        "Governance",
+        storages[storageName],
+      );
       contract = await Tezos.contract.at(deployedContract);
     } catch (e) {
       console.log(e);
@@ -55,6 +59,7 @@ describe("Admin test", async function () {
         },
       );
     });
+
     it("Revert tranfering ownership if someone is already in the transfer pending", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(

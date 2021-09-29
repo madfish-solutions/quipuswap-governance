@@ -82,7 +82,9 @@ const migrate = async (tezos, contract, storage) => {
         console.error(JSON.stringify(e));
         return { contractAddress: null };
       });
-    artifacts.networks[env.network] = { [contract]: operation.contractAddress };
+    artifacts.networks[process.env.NETWORK] = {
+      [contract]: operation.contractAddress,
+    };
     if (!fs.existsSync(env.buildsDir)) {
       fs.mkdirSync(env.buildsDir);
     }
@@ -115,7 +117,7 @@ const runMigrations = async options => {
     options.optionFrom = options.from || 0;
     options.optionTo = options.to || migrations.length;
 
-    const networkConfig = env.networks[options.network];
+    const networkConfig = env.networks[process.env.NETWORK];
 
     const tezos = new TezosToolkit(networkConfig.rpc);
     tezos.setProvider({

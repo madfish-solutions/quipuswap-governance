@@ -64,26 +64,38 @@ describe("Voting test", async function () {
       });
     });
     it("Should allow voting for the same", async function () {
+      const prevStorage = await contract.storage();
+      const prevProposal = await prevStorage.proposals.get(4);
       const op = await contract.methods.vote("4", "for", 50).send();
       await op.confirmation();
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 50);
+      strictEqual(
+        proposal.voters.toNumber(),
+        prevProposal.voters.toNumber() + 1,
+      );
     });
     it("Should allow voting twice for the same proposal", async function () {
+      const prevStorage = await contract.storage();
+      const prevProposal = await prevStorage.proposals.get(4);
       const op = await contract.methods.vote("4", "for", 1).send();
       await op.confirmation();
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 51);
+      strictEqual(proposal.voters.toNumber(), prevProposal.voters.toNumber());
     });
     it("Should allow changing the vote from for to against", async function () {
+      const prevStorage = await contract.storage();
+      const prevProposal = await prevStorage.proposals.get(4);
       const op = await contract.methods.vote("4", "against", 1).send();
       await op.confirmation();
       const storage = await contract.storage();
       const proposal = await storage.proposals.get(4);
       strictEqual(proposal.votes_for.toNumber(), 0);
       strictEqual(proposal.votes_against.toNumber(), 52);
+      strictEqual(proposal.voters.toNumber(), prevProposal.voters.toNumber());
     });
   });
   describe("Testing entrypoint: Claim", async function () {

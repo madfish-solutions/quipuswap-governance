@@ -42,7 +42,7 @@ describe("Proposal test", async function () {
   describe("Testing entrypoint: new_proposal", async function () {
     it("Revert creating proposal with short voting period", async function () {
       await rejects(
-        contract.methods.new_proposal(link, link, 1, 1).send(),
+        contract.methods.new_proposal(link, link, link, 1, 1).send(),
         err => {
           strictEqual(err.message, "Gov/small-voting-perod");
           return true;
@@ -51,7 +51,7 @@ describe("Proposal test", async function () {
     });
     it("Revert creating proposal with long voting period", async function () {
       await rejects(
-        contract.methods.new_proposal(link, link, dayToSec(31), 0).send(),
+        contract.methods.new_proposal(link, link, link, dayToSec(31), 0).send(),
         err => {
           strictEqual(err.message, "Gov/long-voting-perod");
           return true;
@@ -61,7 +61,7 @@ describe("Proposal test", async function () {
     it("Revert creating proposal with long dererral period", async function () {
       await rejects(
         contract.methods
-          .new_proposal(link, link, dayToSec(4), dayToSec(31))
+          .new_proposal(link, link, link, dayToSec(4), dayToSec(31))
           .send(),
         err => {
           strictEqual(err.message, "Gov/long-deferral");
@@ -71,7 +71,7 @@ describe("Proposal test", async function () {
     });
     it("Should create proposal with enough stake", async function () {
       const op = await contract.methods
-        .new_proposal(link, link, dayToSec(4), 0)
+        .new_proposal(link, link, link, dayToSec(4), 0)
         .send();
       await op.confirmation();
       const storage = await contract.storage();
@@ -79,7 +79,7 @@ describe("Proposal test", async function () {
     });
     it("Should create deferral proposal with enough stake", async function () {
       const op = await contract.methods
-        .new_proposal(link, link, dayToSec(4), dayToSec(15))
+        .new_proposal(link, link, link, dayToSec(4), dayToSec(15))
         .send();
       await op.confirmation();
       const storage = await contract.storage();

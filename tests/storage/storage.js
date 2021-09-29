@@ -64,13 +64,13 @@ const withPendingOwnershipEve = {
   accuracy: 1000000,
 };
 
-const w = Buffer.from("dsadas", "ascii").toString("hex");
+const defaultBuffer = Buffer.from("dsadas", "ascii").toString("hex");
 const proposals = MichelsonMap.fromLiteral({
   0: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "0",
     votes_against: "0",
     start_date: "2030-01-01T10:00:00Z",
@@ -82,9 +82,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   1: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "0",
     votes_against: "0",
     start_date: "2020-01-01T10:00:00Z",
@@ -96,9 +96,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   2: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "0",
     votes_against: "0",
     start_date: "2000-01-01T10:00:00Z",
@@ -110,9 +110,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   3: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "0",
     votes_against: "0",
     start_date: "2020-01-01T10:00:00Z",
@@ -124,9 +124,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   4: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "0",
     votes_against: "0",
     start_date: "2020-01-01T10:00:00Z",
@@ -138,9 +138,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   5: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "1",
     votes_against: "0",
     start_date: "2021-05-01T10:00:00Z",
@@ -152,9 +152,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   6: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "200",
     votes_against: "300",
     start_date: "2021-05-01T10:00:00Z",
@@ -166,9 +166,9 @@ const proposals = MichelsonMap.fromLiteral({
   },
   7: {
     creator: alice.pkh,
-    ipfs_link: w,
-    forum_link: w,
-    github_link: w,
+    ipfs_link: defaultBuffer,
+    forum_link: defaultBuffer,
+    github_link: defaultBuffer,
     votes_for: "660",
     votes_against: "0",
     start_date: "2021-05-01T10:00:00Z",

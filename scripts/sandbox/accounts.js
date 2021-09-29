@@ -12,6 +12,10 @@ module.exports = {
   eve: {
     pkh: "tz1MnmtP4uAcgMpeZN6JtyziXeFqqwQG6yn6",
     sk: "edsk3Sb16jcx9KrgMDsbZDmKnuN11v4AbTtPBgBSBTqYftd8Cq3i1e",
-    pk: "edpku9qEgcyfNNDK6EpMvu5SqXDqWRLuxdMxdyH12ivTUuB1KXfGP4"
+    pk: "edpku9qEgcyfNNDK6EpMvu5SqXDqWRLuxdMxdyH12ivTUuB1KXfGP4",
+  },
+  dev: {
+    pkh: "tz1S7zCGGnk8dFGbLuxfdLwEHsJEUJjf2TV2",
+    sk: "edskRrMgUvJfwTE7Fhvv2YdsEPmeNUKQhYZaphZpRV3HpGUqcLcxHS3MeTdHZ4YYk5nfHkDpCCVegSbq5386wjWhwBknyV1SDC",
   },
 };

@@ -1,4 +1,5 @@
 # Description
+Smart-contract for voting on proposals for improving Quipuswap
 
 # Requirements
 

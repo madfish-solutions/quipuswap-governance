@@ -1,5 +1,5 @@
 # Description
-Smart-contract for voting on proposals for improving Quipuswap
+The smart contracts for the Quipuswap text-only governance. It allows anyone two create and vote for proposals by staking the QUIPU. If the quorum is reached the decision will be implemented.
 
 # Requirements
 

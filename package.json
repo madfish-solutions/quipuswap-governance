@@ -14,7 +14,6 @@
   },
   "homepage": "https://github.com/madfish-solutions/quipuswap-governance#readme",
   "engines": {
-    "node": "^14.17.1",
     "yarn": "^1.22.10"
   },
   "dependencies": {
@@ -33,7 +32,6 @@
   "scripts": {
     "clean": "rm -rf ./builds/",
     "migrate": "node scripts/cli.js migrate",
-    "migratefa2": "node scripts/sandbox/migrations/0_fa2.js",
     "compile": "yarn clean && node scripts/cli.js compile",
     "start-sandbox": "docker run --rm --name dev-sandbox --detach -p 8732:20000 tqtezos/flextesa:20210602 flobox start",
     "stop-sandbox": "docker kill dev-sandbox",

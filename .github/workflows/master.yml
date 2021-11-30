@@ -21,8 +21,9 @@ jobs:
         run: sudo apt install git -y
       - name: Install node modules
         run: yarn
-      - name: Run ganache-cli in background
+      - name: Give the right to launch the sandbox
         run: chmod 777 ./ci/flextesa.sh
+      - name: Run ganache-cli in background
         run: ./ci/flextesa.sh
       - name: Compile and test contracts
         run: yarn compile && yarn test

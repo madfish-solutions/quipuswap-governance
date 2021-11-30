@@ -3,25 +3,27 @@ const { migrate } = require("../scripts/helpers");
 
 const { rejects, strictEqual, notStrictEqual } = require("assert");
 
-const { address } = require("../scripts/sandbox/fa2_latest.json");
 const { alice } = require("../scripts/sandbox/accounts");
+const fa2Storage = require("../storage/FA2");
 
 describe("Voting test", async function () {
   let contract;
-  let fa2_contract;
+  let fa2Contract;
   before(async () => {
     try {
       Tezos.setSignerProvider(signerAlice);
+      const deployedFa2 = await migrate(Tezos, "FA2", fa2Storage);
+      fa2Contract = await Tezos.contract.at(deployedFa2);
       const { storages } = require("./storage/storage");
-
+      storages["withProposals"].token_address = deployedFa2;
       const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["withProposals"],
       );
       contract = await Tezos.contract.at(deployedContract);
-      fa2_contract = await Tezos.contract.at(address);
-      const update_op = await fa2_contract.methods
+
+      const update_op = await fa2Contract.methods
         .update_operators([
           {
             add_operator: {
@@ -108,7 +110,7 @@ describe("Voting test", async function () {
     });
     it("Should allow to claim collateral after voting is finished from all available proposals", async function () {
       Tezos.setSignerProvider(signerAlice);
-      let fa2 = await fa2_contract.storage();
+      let fa2 = await fa2Contract.storage();
       let acc = await fa2.account_info.get(alice.pkh);
       const old_balance = await acc.balances.get("0").toNumber();
 
@@ -120,7 +122,7 @@ describe("Voting test", async function () {
         account: alice.pkh,
       });
 
-      fa2 = await fa2_contract.storage();
+      fa2 = await fa2Contract.storage();
       acc = await fa2.account_info.get(alice.pkh);
       const new_balance = await acc.balances.get("0").toNumber();
 

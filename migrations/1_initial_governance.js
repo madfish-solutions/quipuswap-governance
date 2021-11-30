@@ -8,7 +8,7 @@ module.exports = async tezos => {
   const sender = await tezos.signer.publicKeyHash();
   governanceStorage.owner = sender;
   if (process.env.NETWORK === "mainnet") {
-    governanceStorage.token_address = env.TOKEN_ADDRESS;
+    governanceStorage.token_address = process.env.TOKEN_ADDRESS;
   } else {
     fa2Storage.admin = sender;
     fa2Storage.minters = [sender];

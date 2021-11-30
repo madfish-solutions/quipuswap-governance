@@ -2,8 +2,6 @@ const { MichelsonMap } = require("@taquito/michelson-encoder/");
 // const { attachKind } = require("@taquito/taquito/dist/types/operations/types");
 const { alice, bob, eve } = require("../../scripts/sandbox/accounts");
 
-const { address } = require("../../scripts/sandbox/fa2_latest.json");
-
 const proposalConfig = {
   proposal_stake: "5000",
   voting_quorum: "40000",
@@ -22,7 +20,7 @@ const defaultStorage = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: null,
-  token_address: address,
+  token_address: alice.pkh,
   token_id: 0,
   expected_sender: null,
   accuracy: 1000000,
@@ -40,7 +38,7 @@ const withPendingOwnershipBob = {
   proposal_config: proposalConfig,
   pending_owner: bob.pkh,
   temp_proposal_cache: null,
-  token_address: address,
+  token_address: alice.pkh,
   token_id: 0,
   expected_sender: null,
   accuracy: 1000000,
@@ -58,7 +56,7 @@ const withPendingOwnershipEve = {
   proposal_config: proposalConfig,
   pending_owner: eve.pkh,
   temp_proposal_cache: null,
-  token_address: address,
+  token_address: alice.pkh,
   token_id: 0,
   expected_sender: null,
   accuracy: 1000000,
@@ -204,7 +202,7 @@ const withProposals = {
   proposal_config: proposalConfig,
   pending_owner: null,
   temp_proposal_cache: null,
-  token_address: address,
+  token_address: alice.pkh,
   token_id: 0,
   expected_sender: null,
   accuracy: 1000000,

@@ -7,7 +7,7 @@ const {
 const { signerAlice, signerBob, alice, Tezos } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
 const { bob } = require("../scripts/sandbox/accounts");
-
+const fa2Storage = require("../storage/FA2");
 describe("Admin test", async function () {
   let contract;
 
@@ -31,17 +31,20 @@ describe("Admin test", async function () {
     "withPendingOwnershipBob",
     "defaultStorage",
   ];
-
+  let deployedFa2;
+  let fa2Contract;
+  this.beforeAll(async () => {
+    deployedFa2 = await migrate(Tezos, "FA2", fa2Storage);
+    fa2Contract = await Tezos.contract.at(deployedFa2);
+  });
   let deployedContract;
   beforeEach(async () => {
     const storageName = storageList.pop();
     try {
       const { storages } = require("./storage/storage");
-      deployedContract = await migrate(
-        Tezos,
-        "Governance",
-        storages[storageName],
-      );
+      const currentStorage = storages[storageName];
+      currentStorage.token_address = deployedFa2;
+      deployedContract = await migrate(Tezos, "Governance", currentStorage);
       contract = await Tezos.contract.at(deployedContract);
     } catch (e) {
       console.log(e);
@@ -220,9 +223,8 @@ describe("Admin test", async function () {
     });
     it("Should allow ban proposal with from burning proposal stake", async function () {
       Tezos.setSignerProvider(signerAlice);
-      const { address } = require("../scripts/sandbox/fa2_latest.json");
-      fa2_contract = await Tezos.contract.at(address);
-      const update_op = await fa2_contract.methods
+
+      const update_op = await fa2Contract.methods
         .update_operators([
           {
             add_operator: {

@@ -1,2 +1,2 @@
 #!/bin/sh
-yarn start-sandbox && sleep 60
+yarn start-sandbox && sleep 10

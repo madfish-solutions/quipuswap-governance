@@ -22,6 +22,6 @@ jobs:
       - name: Install node modules
         run: yarn
       - name: Run ganache-cli in background
-        run: ./ci/flextesa.sh
+        run: chmod 777 ./ci/flextesa.sh
       - name: Compile and test contracts
         run: yarn compile && yarn test

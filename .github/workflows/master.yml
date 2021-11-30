@@ -23,5 +23,6 @@ jobs:
         run: yarn
       - name: Run ganache-cli in background
         run: chmod 777 ./ci/flextesa.sh
+        run: ./ci/flextesa.sh
       - name: Compile and test contracts
         run: yarn compile && yarn test

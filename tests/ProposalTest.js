@@ -1,6 +1,7 @@
 const { rejects, strictEqual } = require("assert");
 const { Tezos, signerAlice, alice } = require("./utils/cli");
 const { migrate } = require("../scripts/helpers");
+const fa2Storage = require("../storage/FA2");
 
 function dayToSec(day) {
   return day * 86400;
@@ -9,20 +10,23 @@ function dayToSec(day) {
 describe("Proposal test", async function () {
   Tezos.setSignerProvider(signerAlice);
   let contract;
+  let fa2Contract;
   const link = Buffer.from("ipfsLink", "ascii").toString("hex");
 
   before(async () => {
     try {
       const { storages } = require("./storage/storage");
+      const deployedFa2 = await migrate(Tezos, "FA2", fa2Storage);
+      fa2Contract = await Tezos.contract.at(deployedFa2);
+      storages["defaultStorage"].token_address = deployedFa2;
       const deployedContract = await migrate(
         Tezos,
         "Governance",
         storages["defaultStorage"],
       );
       contract = await Tezos.contract.at(deployedContract);
-      const { address } = require("../scripts/sandbox/fa2_latest.json");
-      fa2_contract = await Tezos.contract.at(address);
-      const update_op = await fa2_contract.methods
+
+      const update_op = await fa2Contract.methods
         .update_operators([
           {
             add_operator: {
